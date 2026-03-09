@@ -27,20 +27,3 @@ podwise config show
 The config file lives at `~/.config/podwise/config.yaml`.
 
 ## Usage
-
-```
-podwise get <episode-url> [flags]
-```
-
-### Examples
-
-```bash
-# Fetch transcript in Chinese for downstream processing
-podwise get https://podwise.ai/dashboard/episodes/7360326 --type transcript
-
-# Get Q&A pairs — useful for RAG ingestion
-podwise get <url> --type qa
-
-# Save mind map as xmind file
-podwise get <url> --type mindmap --format xmind --output ./notes/
-```

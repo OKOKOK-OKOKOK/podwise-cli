@@ -1,41 +1,90 @@
 package cmd
 
 import (
+	"context"
+	"fmt"
+	"path"
+	"strconv"
+	"strings"
+
+	"github.com/hardhacker/podwise-cli/internal/api"
+	"github.com/hardhacker/podwise-cli/internal/config"
+	"github.com/hardhacker/podwise-cli/internal/episode"
 	"github.com/spf13/cobra"
 )
 
+// podwise get <subcommand>
 var getCmd = &cobra.Command{
-	Use:   "get <episode-url>",
-	Short: "Get AI insights for a podcast episode",
-	Long: `Fetch AI-processed content for a podcast episode from podwise.ai.
+	Use:     "get <subcommand>",
+	Short:   "Get AI-processed content for a podcast episode",
+	Long:    "Get AI-processed content for a podcast episode from podwise.ai.",
+	Example: `podwise get transcript https://podwise.ai/dashboard/episodes/7360326`,
+}
 
-By default the summary is printed to stdout. Use flags to choose a different
-output type or to export directly to a note-taking tool.
+// podwise get transcript <episode-url>
+var transcriptSeconds bool
 
-Examples:
-  podwise get https://podwise.ai/dashboard/episodes/7360326
-  podwise get <episode-url> --type transcript
-  podwise get <episode-url> --type mindmap --output ./notes/
-  podwise get <episode-url> --export notion`,
-	Args: cobra.ExactArgs(1),
-	RunE: runGet,
+var getTranscriptCmd = &cobra.Command{
+	Use:     "transcript <episode-url>",
+	Short:   "Get the full transcript of a podcast episode",
+	Long:    "Get the full transcript of a podcast episode and print it to stdout.",
+	Example: `podwise get transcript https://podwise.ai/dashboard/episodes/7360326`,
+	Args:    cobra.ExactArgs(1),
+	RunE:    runGetTranscript,
 }
 
 func init() {
-	// TODO: --type    string   output type: summary | outline | transcript | qa | mindmap (default "summary")
-	// TODO: --lang    string   output language: en | zh | ja | ko | fr | de | es | pt (default: episode language)
-	// TODO: --output  string   write output to this file or directory instead of stdout
-	// TODO: --export  string   export to a tool: notion | obsidian | readwise | logseq
-	// TODO: --format  string   file format when exporting: md | pdf | srt | xmind (default "md")
+	getTranscriptCmd.Flags().BoolVar(&transcriptSeconds, "seconds", false, "show time as start offset in seconds instead of hh:mm:ss")
+	getCmd.AddCommand(getTranscriptCmd)
 }
 
-func runGet(cmd *cobra.Command, args []string) error {
-	_ = args[0] // episode URL or podwise episode ID
+func runGetTranscript(cmd *cobra.Command, args []string) error {
+	seq, err := parseSeq(args[0])
+	if err != nil {
+		return fmt.Errorf("invalid episode: %w", err)
+	}
 
-	// TODO: resolve args[0] — accept podwise episode URL, raw RSS/audio URL, or episode ID
-	// TODO: call podwise.ai API to fetch the requested content type
-	// TODO: apply language translation if --lang differs from source
-	// TODO: write result to stdout, --output path, or trigger --export integration
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+	if err := config.Validate(cfg); err != nil {
+		return err
+	}
 
+	client := api.New(cfg.APIBaseURL, cfg.APIKey)
+	segments, err := episode.FetchTranscripts(context.Background(), client, seq)
+	if err != nil {
+		return err
+	}
+
+	for _, seg := range segments {
+		var timeLabel string
+		if transcriptSeconds {
+			timeLabel = strconv.FormatFloat(seg.Start/1000, 'f', -1, 64)
+		} else {
+			timeLabel = seg.Time
+		}
+
+		if seg.Speaker != "" {
+			fmt.Printf("[%s] - %s: %s\n", timeLabel, seg.Speaker, seg.Content)
+		} else {
+			fmt.Printf("[%s] - %s\n", timeLabel, seg.Content)
+		}
+	}
 	return nil
+}
+
+// parseSeq extracts the integer episode seq from a podwise episode URL.
+// Expected format: https://podwise.ai/dashboard/episodes/<seq>
+func parseSeq(input string) (int, error) {
+	if !strings.HasPrefix(input, "http://") && !strings.HasPrefix(input, "https://") {
+		return 0, fmt.Errorf("%q is not a valid episode URL", input)
+	}
+	raw := path.Base(strings.TrimRight(input, "/"))
+	seq, err := strconv.Atoi(raw)
+	if err != nil || seq <= 0 {
+		return 0, fmt.Errorf("%q does not contain a valid episode ID", input)
+	}
+	return seq, nil
 }

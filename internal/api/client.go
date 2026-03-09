@@ -56,11 +56,45 @@ func New(baseURL, apiKey string, opts ...Option) *Client {
 // APIError is returned when the server responds with a non-2xx status.
 type APIError struct {
 	StatusCode int
-	Body       string
+	Message    string // parsed from the JSON "message" field, or raw body as fallback
 }
 
 func (e *APIError) Error() string {
-	return fmt.Sprintf("api error %d: %s", e.StatusCode, e.Body)
+	label := statusLabel(e.StatusCode)
+	if label != "" {
+		return fmt.Sprintf("%s: %s", label, e.Message)
+	}
+	return fmt.Sprintf("api error %d: %s", e.StatusCode, e.Message)
+}
+
+// statusLabel returns a human-readable label for well-known API error codes.
+func statusLabel(code int) string {
+	switch code {
+	case 400:
+		return "bad request"
+	case 401:
+		return "authentication failed"
+	case 402:
+		return "paid plan required"
+	case 404:
+		return "not found"
+	case 429:
+		return "rate limit exceeded"
+	default:
+		return ""
+	}
+}
+
+// parseErrorMessage tries to extract the "message" field from a JSON error body.
+// Falls back to the raw body string when the body is not valid JSON.
+func parseErrorMessage(body []byte) string {
+	var payload struct {
+		Message string `json:"message"`
+	}
+	if err := json.Unmarshal(body, &payload); err == nil && payload.Message != "" {
+		return payload.Message
+	}
+	return string(body)
 }
 
 // Get performs a GET request to path (relative to baseURL) and decodes the
@@ -118,7 +152,10 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return &APIError{StatusCode: resp.StatusCode, Body: string(respBody)}
+		return &APIError{
+			StatusCode: resp.StatusCode,
+			Message:    parseErrorMessage(respBody),
+		}
 	}
 
 	if out != nil && len(respBody) > 0 {
