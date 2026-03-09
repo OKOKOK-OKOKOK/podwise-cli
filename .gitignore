@@ -1,6 +1,7 @@
 # build output
 podwise
 podwise-cli
+test-api.sh
 dist/
 
 # Go

@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hardhacker/podwise-cli/internal/api"
 	"github.com/hardhacker/podwise-cli/internal/config"
 	"github.com/spf13/cobra"
 )
@@ -10,6 +12,14 @@ import (
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage podwise configuration",
+}
+
+// meResponse is the response from the /me endpoint.
+type meResponse struct {
+	Success bool `json:"success"`
+	Result  struct {
+		UserID string `json:"userId"`
+	} `json:"result"`
 }
 
 // podwise config show
@@ -31,6 +41,20 @@ var configShowCmd = &cobra.Command{
 		fmt.Printf("config file : %s\n", path)
 		fmt.Printf("api_key     : %s\n", maskedKey)
 		fmt.Printf("api_base_url: %s\n", cfg.APIBaseURL)
+
+		if cfg.APIKey == "" {
+			fmt.Printf("user_id     : (api_key not set)\n")
+			return nil
+		}
+
+		client := api.New(cfg.APIBaseURL, cfg.APIKey)
+		var me meResponse
+		if err := client.Get(context.Background(), "/open/v1/me", nil, &me); err != nil {
+			fmt.Printf("user_id     : (failed to fetch: %v)\n", err)
+			return nil
+		}
+		fmt.Printf("user_id     : %s\n", me.Result.UserID)
+
 		return nil
 	},
 }
