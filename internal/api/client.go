@@ -56,10 +56,20 @@ func New(baseURL, apiKey string, opts ...Option) *Client {
 // APIError is returned when the server responds with a non-2xx status.
 type APIError struct {
 	StatusCode int
+	ErrCode    string // parsed from the JSON "error" field
 	Message    string // parsed from the JSON "message" field, or raw body as fallback
 }
 
 func (e *APIError) Error() string {
+	if e.StatusCode == 404 {
+		switch e.ErrCode {
+		case "not_found":
+			return fmt.Sprintf("not found: %s", e.Message)
+		case "not_transcribed":
+			return fmt.Sprintf("not processed: %s", e.Message)
+		}
+	}
+
 	label := statusLabel(e.StatusCode)
 	if label != "" {
 		return fmt.Sprintf("%s: %s", label, e.Message)
@@ -85,16 +95,17 @@ func statusLabel(code int) string {
 	}
 }
 
-// parseErrorMessage tries to extract the "message" field from a JSON error body.
-// Falls back to the raw body string when the body is not valid JSON.
-func parseErrorMessage(body []byte) string {
+// parseErrorResponse tries to extract the "error" and "message" fields from a JSON error body.
+// Falls back to the raw body string for the message when the body is not valid JSON.
+func parseErrorResponse(body []byte) (string, string) {
 	var payload struct {
+		Error   string `json:"error"`
 		Message string `json:"message"`
 	}
-	if err := json.Unmarshal(body, &payload); err == nil && payload.Message != "" {
-		return payload.Message
+	if err := json.Unmarshal(body, &payload); err == nil && (payload.Message != "" || payload.Error != "") {
+		return payload.Error, payload.Message
 	}
-	return string(body)
+	return "", string(body)
 }
 
 // Get performs a GET request to path (relative to baseURL) and decodes the
@@ -152,9 +163,11 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		errCode, errMsg := parseErrorResponse(respBody)
 		return &APIError{
 			StatusCode: resp.StatusCode,
-			Message:    parseErrorMessage(respBody),
+			ErrCode:    errCode,
+			Message:    errMsg,
 		}
 	}
 

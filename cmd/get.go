@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"path"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -16,8 +16,8 @@ import (
 // podwise get <subcommand>
 var getCmd = &cobra.Command{
 	Use:   "get <subcommand>",
-	Short: "Get AI-processed content for a podcast episode",
-	Long:  "Get AI-processed content for a podcast episode from podwise.ai.",
+	Short: "Fetch AI-generated content for a podcast episode or YouTube video",
+	Long:  "Fetch AI-generated content (transcript, summary, chapters, Q&A, mind map, highlights, keywords) for a podcast episode or YouTube video via the podwise.ai API.",
 	Example: `  podwise get transcript https://podwise.ai/dashboard/episodes/7360326
   podwise get summary    https://podwise.ai/dashboard/episodes/7360326
   podwise get qa         https://podwise.ai/dashboard/episodes/7360326
@@ -36,8 +36,8 @@ var transcriptSeconds bool
 
 var getTranscriptCmd = &cobra.Command{
 	Use:     "transcript <episode-url>",
-	Short:   "Get the full transcript of a podcast episode",
-	Long:    "Get the full transcript of a podcast episode and print it to stdout.",
+	Short:   "Print the full transcript with timestamps and speaker labels",
+	Long:    "Print the full AI-generated transcript of a podcast episode or YouTube video. Each line includes a timestamp; speaker names are shown when available.",
 	Example: `  podwise get transcript https://podwise.ai/dashboard/episodes/7360326`,
 	Args:    cobra.ExactArgs(1),
 	RunE:    runGetTranscript,
@@ -46,8 +46,8 @@ var getTranscriptCmd = &cobra.Command{
 // podwise get summary <episode-url>
 var getSummaryCmd = &cobra.Command{
 	Use:     "summary <episode-url>",
-	Short:   "Get the AI-generated summary of a podcast episode",
-	Long:    "Get the AI-generated summary of a podcast episode and print it to stdout.",
+	Short:   "Print the AI-generated summary and key takeaways",
+	Long:    "Print the AI-generated summary of a podcast episode or YouTube video, followed by a numbered list of key takeaways.",
 	Example: `  podwise get summary https://podwise.ai/dashboard/episodes/7360326`,
 	Args:    cobra.ExactArgs(1),
 	RunE:    runGetSummary,
@@ -56,8 +56,8 @@ var getSummaryCmd = &cobra.Command{
 // podwise get qa <episode-url>
 var getQACmd = &cobra.Command{
 	Use:     "qa <episode-url>",
-	Short:   "Get the Q&A pairs extracted from a podcast episode",
-	Long:    "Get the AI-extracted question-and-answer pairs from a podcast episode and print them to stdout.",
+	Short:   "Print AI-extracted Q&A pairs with optional speaker attribution",
+	Long:    "Print the question-and-answer pairs extracted by AI from a podcast episode or YouTube video. Speaker names are shown alongside each question and answer when available.",
 	Example: `  podwise get qa https://podwise.ai/dashboard/episodes/7360326`,
 	Args:    cobra.ExactArgs(1),
 	RunE:    runGetQA,
@@ -66,8 +66,8 @@ var getQACmd = &cobra.Command{
 // podwise get chapters <episode-url>
 var getChaptersCmd = &cobra.Command{
 	Use:     "chapters <episode-url>",
-	Short:   "Get the chapter breakdown of a podcast episode",
-	Long:    "Get the AI-generated chapter breakdown of a podcast episode and print it to stdout.",
+	Short:   "Print the AI-generated chapter breakdown with timestamps",
+	Long:    "Print the time-stamped chapter breakdown of a podcast episode or YouTube video. Each chapter includes a title and a short summary; chapters containing ads are labeled [ad].",
 	Example: `  podwise get chapters https://podwise.ai/dashboard/episodes/7360326`,
 	Args:    cobra.ExactArgs(1),
 	RunE:    runGetChapters,
@@ -76,8 +76,8 @@ var getChaptersCmd = &cobra.Command{
 // podwise get mindmap <episode-url>
 var getMindmapCmd = &cobra.Command{
 	Use:     "mindmap <episode-url>",
-	Short:   "Get the mind map of a podcast episode",
-	Long:    "Get the AI-generated mind map (in Markdown) of a podcast episode and print it to stdout.",
+	Short:   "Print the AI-generated mind map in Markdown format",
+	Long:    "Print an AI-generated mind map of the key topics in a podcast episode or YouTube video, formatted as a Markdown outline.",
 	Example: `  podwise get mindmap https://podwise.ai/dashboard/episodes/7360326`,
 	Args:    cobra.ExactArgs(1),
 	RunE:    runGetMindmap,
@@ -86,8 +86,8 @@ var getMindmapCmd = &cobra.Command{
 // podwise get highlights <episode-url>
 var getHighlightsCmd = &cobra.Command{
 	Use:     "highlights <episode-url>",
-	Short:   "Get the notable highlights of a podcast episode",
-	Long:    "Get the AI-extracted notable highlights of a podcast episode and print them to stdout.",
+	Short:   "Print AI-extracted notable highlights with timestamps",
+	Long:    "Print the notable moments extracted by AI from a podcast episode or YouTube video, each with a timestamp.",
 	Example: `  podwise get highlights https://podwise.ai/dashboard/episodes/7360326`,
 	Args:    cobra.ExactArgs(1),
 	RunE:    runGetHighlights,
@@ -96,8 +96,8 @@ var getHighlightsCmd = &cobra.Command{
 // podwise get keywords <episode-url>
 var getKeywordsCmd = &cobra.Command{
 	Use:     "keywords <episode-url>",
-	Short:   "Get the topic keywords of a podcast episode",
-	Long:    "Get the AI-extracted topic keywords of a podcast episode and print them to stdout.",
+	Short:   "Print AI-extracted topic keywords with descriptions",
+	Long:    "Print the key topics extracted by AI from a podcast episode or YouTube video. Each keyword is accompanied by a short description.",
 	Example: `  podwise get keywords https://podwise.ai/dashboard/episodes/7360326`,
 	Args:    cobra.ExactArgs(1),
 	RunE:    runGetKeywords,
@@ -285,13 +285,21 @@ func fetchSummaryForURL(rawURL string) (*episode.SummaryResult, error) {
 // parseSeq extracts the integer episode seq from a podwise episode URL.
 // Expected format: https://podwise.ai/dashboard/episodes/<seq>
 func parseSeq(input string) (int, error) {
-	if !strings.HasPrefix(input, "http://") && !strings.HasPrefix(input, "https://") {
-		return 0, fmt.Errorf("%q is not a valid episode URL", input)
+	const hint = "(expected https://podwise.ai/dashboard/episodes/<id>)"
+
+	u, err := url.Parse(input)
+	if err != nil || u.Scheme != "https" || u.Host != "podwise.ai" {
+		return 0, fmt.Errorf("%q is not a valid podwise episode URL %s", input, hint)
 	}
-	raw := path.Base(strings.TrimRight(input, "/"))
-	seq, err := strconv.Atoi(raw)
+
+	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
+	if len(parts) != 3 || parts[0] != "dashboard" || parts[1] != "episodes" || parts[2] == "" {
+		return 0, fmt.Errorf("%q is not a valid podwise episode URL %s", input, hint)
+	}
+
+	seq, err := strconv.Atoi(parts[2])
 	if err != nil || seq <= 0 {
-		return 0, fmt.Errorf("%q does not contain a valid episode ID", input)
+		return 0, fmt.Errorf("episode ID %q is not a positive integer %s", parts[2], hint)
 	}
 	return seq, nil
 }

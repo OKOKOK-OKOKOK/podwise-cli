@@ -9,12 +9,12 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:          "podwise",
-	Short:        "podwise — AI podcast insights from your terminal",
+	Short:        "podwise — AI podcast & YouTube insights from your terminal",
 	SilenceUsage: true,
 	Long: `podwise is the CLI client for podwise.ai.
 
-Turn any podcast episode into AI-powered summaries, outlines, transcripts,
-Q&A, and mind maps — then export them to Notion, Obsidian, Readwise, and more.`,
+Turn any podcast episode or YouTube video into AI-powered transcripts, summaries, chapters, Q&A,
+mind maps, highlights and more.`,
 }
 
 func Execute(version, commit, date string) {
