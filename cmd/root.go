@@ -27,6 +27,7 @@ func Execute(version, commit, date string) {
 
 func init() {
 	rootCmd.AddCommand(getCmd)
+	rootCmd.AddCommand(processCmd)
 	rootCmd.AddCommand(searchCmd)
 	rootCmd.AddCommand(configCmd)
 }

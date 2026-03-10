@@ -70,6 +70,10 @@ func (e *APIError) Error() string {
 		}
 	}
 
+	if e.StatusCode == 402 && e.ErrCode == "out_of_quota" {
+		return fmt.Sprintf("insufficient credits: %s", e.Message)
+	}
+
 	label := statusLabel(e.StatusCode)
 	if label != "" {
 		return fmt.Sprintf("%s: %s", label, e.Message)
