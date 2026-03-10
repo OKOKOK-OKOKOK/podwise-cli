@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
@@ -33,6 +35,7 @@ var forceRefresh bool
 
 // podwise get transcript <episode-url>
 var transcriptSeconds bool
+var transcriptFormat string
 
 var getTranscriptCmd = &cobra.Command{
 	Use:     "transcript <episode-url>",
@@ -106,6 +109,7 @@ var getKeywordsCmd = &cobra.Command{
 func init() {
 	getCmd.PersistentFlags().BoolVarP(&forceRefresh, "refresh", "r", false, "bypass cache and re-fetch from API (only if cached file is older than 10 minutes)")
 	getTranscriptCmd.Flags().BoolVar(&transcriptSeconds, "seconds", false, "show time as start offset in seconds instead of hh:mm:ss")
+	getTranscriptCmd.Flags().StringVar(&transcriptFormat, "format", "text", "output format: text, json, srt, vtt")
 	getCmd.AddCommand(getTranscriptCmd)
 	getCmd.AddCommand(getSummaryCmd)
 	getCmd.AddCommand(getQACmd)
@@ -135,21 +139,119 @@ func runGetTranscript(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	for _, seg := range segments {
-		var timeLabel string
-		if transcriptSeconds {
-			timeLabel = strconv.FormatFloat(seg.Start/1000, 'f', -1, 64)
-		} else {
-			timeLabel = seg.Time
-		}
+	return printTranscript(segments, transcriptFormat, transcriptSeconds)
+}
 
-		if seg.Speaker != "" {
-			fmt.Printf("[%s] - %s: %s\n", timeLabel, seg.Speaker, seg.Content)
-		} else {
-			fmt.Printf("[%s] - %s\n", timeLabel, seg.Content)
-		}
+// printTranscript dispatches to the appropriate format renderer.
+func printTranscript(segments []episode.Segment, format string, useSeconds bool) error {
+	switch format {
+	case "text", "":
+		printTranscriptText(segments, useSeconds)
+	case "json":
+		return printTranscriptJSON(segments, useSeconds)
+	case "srt":
+		printTranscriptSRT(segments)
+	case "vtt":
+		printTranscriptVTT(segments)
+	default:
+		return fmt.Errorf("unknown format %q: use text, json, srt, or vtt", format)
 	}
 	return nil
+}
+
+// timeLabel returns the timestamp string for a segment based on the useSeconds flag.
+func timeLabel(seg episode.Segment, useSeconds bool) string {
+	if useSeconds {
+		return strconv.FormatFloat(seg.Start/1000, 'f', -1, 64)
+	}
+	return seg.Time
+}
+
+// segmentEnd returns the end timestamp (ms) for a segment, falling back to start+2s.
+func segmentEnd(seg episode.Segment) float64 {
+	if seg.End > seg.Start {
+		return seg.End
+	}
+	return seg.Start + 2000
+}
+
+// msToTimestamp converts milliseconds to "HH:MM:SS" + sep + "mmm".
+func msToTimestamp(ms float64, sep byte) string {
+	total := int(ms)
+	millis := total % 1000
+	total /= 1000
+	secs := total % 60
+	total /= 60
+	mins := total % 60
+	hours := total / 60
+	return fmt.Sprintf("%02d:%02d:%02d%c%03d", hours, mins, secs, sep, millis)
+}
+
+func printTranscriptText(segments []episode.Segment, useSeconds bool) {
+	for _, seg := range segments {
+		t := timeLabel(seg, useSeconds)
+		if seg.Speaker != "" {
+			fmt.Printf("[%s] - %s: %s\n", t, seg.Speaker, seg.Content)
+		} else {
+			fmt.Printf("[%s] - %s\n", t, seg.Content)
+		}
+	}
+}
+
+func printTranscriptJSON(segments []episode.Segment, useSeconds bool) error {
+	type jsonSegment struct {
+		Start   any    `json:"start"`
+		Speaker string `json:"speaker,omitempty"`
+		Content string `json:"content"`
+	}
+
+	out := make([]jsonSegment, len(segments))
+	for i, seg := range segments {
+		var start any
+		if useSeconds {
+			start = seg.Start / 1000
+		} else {
+			start = seg.Time
+		}
+		out[i] = jsonSegment{Start: start, Speaker: seg.Speaker, Content: seg.Content}
+	}
+
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	return enc.Encode(out)
+}
+
+func printTranscriptSRT(segments []episode.Segment) {
+	for i, seg := range segments {
+		fmt.Printf("%d\n%s --> %s\n",
+			i+1,
+			msToTimestamp(seg.Start, ','),
+			msToTimestamp(segmentEnd(seg), ','),
+		)
+		if seg.Speaker != "" {
+			fmt.Printf("%s: %s\n", seg.Speaker, seg.Content)
+		} else {
+			fmt.Println(seg.Content)
+		}
+		fmt.Println()
+	}
+}
+
+func printTranscriptVTT(segments []episode.Segment) {
+	fmt.Println("WEBVTT")
+	fmt.Println()
+	for _, seg := range segments {
+		fmt.Printf("%s --> %s\n",
+			msToTimestamp(seg.Start, '.'),
+			msToTimestamp(segmentEnd(seg), '.'),
+		)
+		if seg.Speaker != "" {
+			fmt.Printf("%s: %s\n", seg.Speaker, seg.Content)
+		} else {
+			fmt.Println(seg.Content)
+		}
+		fmt.Println()
+	}
 }
 
 func runGetSummary(cmd *cobra.Command, args []string) error {
@@ -288,7 +390,7 @@ func parseSeq(input string) (int, error) {
 	const hint = "(expected https://podwise.ai/dashboard/episodes/<id>)"
 
 	u, err := url.Parse(input)
-	if err != nil || u.Scheme != "https" || u.Host != "podwise.ai" {
+	if err != nil || u.Scheme != "https" || (u.Host != "podwise.ai" && u.Host != "beta.podwise.ai") {
 		return 0, fmt.Errorf("%q is not a valid podwise episode URL %s", input, hint)
 	}
 

@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/hardhacker/podwise-cli/internal/api"
@@ -15,11 +16,15 @@ var processNoWait bool
 var processPollInterval time.Duration
 var processTimeout time.Duration
 
-// podwise process <episode-url>
+// podwise process <url>
 var processCmd = &cobra.Command{
-	Use:   "process <episode-url>",
-	Short: "Submit an episode or YouTube video for AI processing",
+	Use:   "process <url>",
+	Short: "Submit a podcast episode or YouTube video for AI processing",
 	Long: `Submit a podcast episode or YouTube video for AI processing (transcription and analysis).
+
+Accepted URL formats:
+  https://podwise.ai/dashboard/episodes/<id>   Podwise episode
+  https://www.youtube.com/watch?v=<id>         YouTube video
 
 Processing consumes credits from your account. The API is asynchronous —
 the request returns immediately and the command polls for status until complete.
@@ -27,13 +32,12 @@ the request returns immediately and the command polls for status until complete.
 Status values:
   waiting     episode is queued and will be picked up shortly
   processing  transcription and AI analysis is in progress
-  done        processing is complete; use "podwise get" to fetch results
+  done        processing is complete; use "podwise get" to fetch results`,
 
-Use --no-wait to submit without waiting for completion.
-Use --timeout to override the maximum wait time (default 30m).`,
-	Example: `  podwise process https://podwise.ai/dashboard/episodes/7360326`,
-	Args:    cobra.ExactArgs(1),
-	RunE:    runProcess,
+	Example: `  podwise process https://podwise.ai/dashboard/episodes/7360326
+  podwise process https://www.youtube.com/watch?v=d0-Gn_Bxf8s`,
+	Args: cobra.ExactArgs(1),
+	RunE: runProcess,
 }
 
 func init() {
@@ -43,7 +47,14 @@ func init() {
 }
 
 func runProcess(cmd *cobra.Command, args []string) error {
-	seq, err := parseSeq(args[0])
+	input := args[0]
+
+	if isYouTubeURL(input) {
+		fmt.Println("YouTube video processing is not yet supported.")
+		return nil
+	}
+
+	seq, err := parseSeq(input)
 	if err != nil {
 		return fmt.Errorf("invalid episode: %w", err)
 	}
@@ -136,6 +147,22 @@ func printProcessStatus(r *episode.ProcessResult, maxProgress float64) {
 	default:
 		fmt.Printf("  [%s] ? %s\n", ts, r.Status)
 	}
+}
+
+// isYouTubeURL reports whether rawURL points to a YouTube video.
+// Recognised hosts: youtube.com (and www.), youtu.be.
+func isYouTubeURL(rawURL string) bool {
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Scheme != "https" {
+		return false
+	}
+	switch u.Hostname() {
+	case "youtube.com", "www.youtube.com":
+		return u.Query().Get("v") != ""
+	case "youtu.be":
+		return len(u.Path) > 1
+	}
+	return false
 }
 
 func printProcessDoneHint(seq int) {
