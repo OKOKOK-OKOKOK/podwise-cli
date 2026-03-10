@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -15,20 +16,23 @@ import (
 const defaultSearchLimit = 10
 
 var searchLimit int
+var searchJSONOutput bool
 
 // podwise search <query>
 var searchCmd = &cobra.Command{
 	Use:   "search <query>",
 	Short: "Search for podcast episodes",
 	Long:  "Search for podcast episodes across the Podwise database and print results to stdout.",
-	Example: `  podwise search "artificial intelligence"
-  podwise search "machine learning" --limit 20`,
+	Example: `  podwise search "machine learning"
+  podwise search "machine learning" --limit 20
+  podwise search "machine learning" --json`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: runSearch,
 }
 
 func init() {
 	searchCmd.Flags().IntVar(&searchLimit, "limit", defaultSearchLimit, "maximum number of results to return (max 50)")
+	searchCmd.Flags().BoolVar(&searchJSONOutput, "json", false, "output results as formatted JSON instead of markdown")
 }
 
 func runSearch(cmd *cobra.Command, args []string) error {
@@ -49,8 +53,35 @@ func runSearch(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(result.Hits) == 0 {
-		fmt.Println("(no results found)")
+		if searchJSONOutput {
+			fmt.Println("[]")
+		} else {
+			fmt.Println("(no results found)")
+		}
 		return nil
+	}
+
+	if searchJSONOutput {
+		type jsonHit struct {
+			Title       string `json:"title"`
+			PodcastName string `json:"podcast_name"`
+			PublishDate string `json:"publish_date"`
+			EpisodeURL  string `json:"episode_url"`
+			Description string `json:"description,omitempty"`
+		}
+		hits := make([]jsonHit, 0, len(result.Hits))
+		for _, hit := range result.Hits {
+			hits = append(hits, jsonHit{
+				Title:       hit.Title,
+				PodcastName: hit.PodcastName,
+				PublishDate: time.Unix(hit.PublishTime, 0).Format("2006-01-02"),
+				EpisodeURL:  fmt.Sprintf("https://podwise.ai/dashboard/episodes/%d", hit.Seq),
+				Description: hit.Content,
+			})
+		}
+		enc := json.NewEncoder(cmd.OutOrStdout())
+		enc.SetIndent("", "  ")
+		return enc.Encode(hits)
 	}
 
 	fmt.Printf("# Search: \"%s\"\n\n", query)
