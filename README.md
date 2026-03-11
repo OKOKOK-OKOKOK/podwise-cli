@@ -2,14 +2,38 @@
 
 CLI client for [podwise.ai](https://podwise.ai) — turn any podcast episode into AI-powered insights, designed for use in AI agents and skills workflows.
 
-Podwise transforms hours of podcasts into summaries, outlines, transcripts, Q&A, and mind maps. This CLI is purpose-built as a **tool for AI agents** — letting LLMs, skills runtimes, and automation pipelines fetch structured podcast insights without a browser or human in the loop.
+Podwise transforms hours of podcasts into transcripts, summaries, outlines, Q&A, and mind maps. This CLI is purpose-built as a **tool for AI agents** — letting LLMs, skills runtimes, and automation pipelines fetch structured podcast insights without a browser or human in the loop.
 
 ## Installation
+
+### Automatic (Recommended)
 
 Run the following command to install the latest version of `podwise`:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/hardhackerlabs/podwise-cli/main/install.sh | sh
+```
+
+### Manual (Binary)
+
+1. Download the latest binary for your OS and architecture from [GitHub Releases](https://github.com/hardhackerlabs/podwise-cli/releases).
+2. Unpack the archive (e.g., `tar -xzf podwise_linux_amd64.tar.gz`).
+3. Move the `podwise` binary to a directory in your PATH, for example:
+   ```bash
+   mv podwise /usr/local/bin/
+   ```
+4. Make sure it's executable: `chmod +x /usr/local/bin/podwise`.
+
+### From Source
+
+If you have Go installed, you can build and install the binary directly from the source:
+
+```bash
+git clone https://github.com/hardhackerlabs/podwise-cli.git
+cd podwise-cli
+go build -o podwise .
+# Move the binary to a directory in your PATH, e.g.,
+sudo mv podwise /usr/local/bin/
 ```
 
 ## Configuration
@@ -54,7 +78,7 @@ podwise process https://youtu.be/d0-Gn_Bxf8s`,
 
 ```bash
 # Get summary
-podwise get summary http://podwise.ai/dashboard/episodes/7360326
+podwise get summary https://podwise.ai/dashboard/episodes/7360326
 
 # Get transcript
 podwise get transcript <episode-url>
