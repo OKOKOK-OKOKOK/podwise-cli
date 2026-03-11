@@ -6,24 +6,62 @@ Podwise transforms hours of podcasts into summaries, outlines, transcripts, Q&A,
 
 ## Installation
 
-```bash
-# Build from source
-go build -o podwise .
+Run the following command to install the latest version of `podwise`:
 
-# Or use goreleaser snapshot build
-goreleaser release --snapshot --clean
+```bash
+curl -sL https://raw.githubusercontent.com/hardhackerlabs/podwise-cli/main/install.sh | sh
 ```
 
 ## Configuration
 
-```bash
-# Set your podwise.ai API key
-podwise config set api_key sk-xxxx
+First, set your [podwise.ai](https://podwise.ai) API key:
 
-# Verify config
+```bash
+# Set your API key
+podwise config set api_key your-sk-xxxx
+
+# Verify connection
 podwise config show
 ```
 
-The config file lives at `~/.config/podwise/config.yaml`.
+The configuration is stored at `~/.config/podwise/config.yaml`.
 
 ## Usage
+
+You can search for podcast episodes or process specific episodes to get summaries and transcripts.
+
+### Search Episodes
+
+```bash
+podwise search "Hard Fork"
+```
+
+### Process an Episode
+
+Use a podcast URL to fetch its structured data:
+
+```bash
+# Podwise episode URL (Recommended)
+podwise process https://podwise.ai/dashboard/episodes/7360326
+
+# 小宇宙 episode URL 
+podwise process https://www.xiaoyuzhoufm.com/episode/abc123
+
+# Youtube video URL
+podwise process https://www.youtube.com/watch?v=d0-Gn_Bxf8s
+podwise process https://youtu.be/d0-Gn_Bxf8s`,
+```
+
+### Get Episode Details
+```bash
+# Get summary
+podwise get summary http://podwise.ai/dashboard/episodes/7360326
+
+# Get transcript
+podwise get transcript <episode-url>
+```
+
+For more details on all available commands and flags, run:
+```bash
+podwise --help
+```

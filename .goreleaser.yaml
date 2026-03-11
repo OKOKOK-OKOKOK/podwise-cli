@@ -12,14 +12,12 @@ builds:
     goos:
       - darwin
       - linux
+      - windows
     goarch:
-      - arm64  # macOS Apple Silicon
-      - amd64  # Linux x86-64
-    # only produce the two target combinations
+      - amd64
+      - arm64
     ignore:
-      - goos: darwin
-        goarch: amd64
-      - goos: linux
+      - goos: windows
         goarch: arm64
     ldflags:
       - -s -w
@@ -29,6 +27,9 @@ builds:
 
 archives:
   - format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
     rlcp: true
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     files:
