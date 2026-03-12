@@ -8,7 +8,7 @@ Podwise transforms hours of podcasts into transcripts, summaries, outlines, Q&A,
 
 ## Installation
 
-### Automatic (Recommended)
+#### Automatic (Recommended)
 
 Run the following command to install the latest version of `podwise`:
 
@@ -16,7 +16,7 @@ Run the following command to install the latest version of `podwise`:
 curl -sL https://raw.githubusercontent.com/hardhackerlabs/podwise-cli/main/install.sh | sh
 ```
 
-### Manual (Binary)
+#### Manual (Binary)
 
 1. Download the latest binary for your OS and architecture from [GitHub Releases](https://github.com/hardhackerlabs/podwise-cli/releases).
 2. Unpack the archive (e.g., `tar -xzf podwise_linux_amd64.tar.gz`).
@@ -26,7 +26,7 @@ curl -sL https://raw.githubusercontent.com/hardhackerlabs/podwise-cli/main/insta
    ```
 4. Make sure it's executable: `chmod +x /usr/local/bin/podwise`.
 
-### From Source
+#### From Source
 
 If you have Go installed, you can build and install the binary directly from the source:
 
@@ -40,7 +40,7 @@ sudo mv podwise /usr/local/bin/
 
 ## Configuration
 
-First, create your [podwise.ai](https://podwise.ai/dashboard/settings/developer) API key:
+First, create your [podwise.ai](https://podwise.ai/dashboard/settings) API key:
 
 ```bash
 # Set your API key
