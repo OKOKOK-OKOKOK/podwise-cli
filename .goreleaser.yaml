@@ -3,6 +3,7 @@ project_name: podwise
 before:
   hooks:
     - go mod tidy
+    - sh -c 'mkdir -p /tmp/_podwise_build/podwise-skills && cp -r skills/. /tmp/_podwise_build/podwise-skills/ && tar czf podwise-skills.tar.gz -C /tmp/_podwise_build podwise-skills && rm -rf /tmp/_podwise_build'
 
 builds:
   - binary: podwise
@@ -38,6 +39,8 @@ archives:
 
 checksum:
   name_template: "checksums.txt"
+  extra_files:
+    - glob: podwise-skills.tar.gz
 
 release:
   disable: true

@@ -4,6 +4,8 @@ CLI client for [podwise.ai](https://podwise.ai) — turn any podcast episode int
 
 Podwise transforms hours of podcasts into transcripts, summaries, outlines, Q&A, and mind maps. This CLI is purpose-built as a **tool for AI agents** — letting LLMs, skills runtimes, and automation pipelines fetch structured podcast insights without a browser or human in the loop.
 
+> Looking for ready-to-use agent skills? Jump to [Agent Skills](#agent-skills) →
+
 ## Installation
 
 ### Automatic (Recommended)
@@ -88,3 +90,13 @@ For more details on all available commands and flags, run:
 ```bash
 podwise --help
 ```
+
+## Agent Skills
+
+Podwise provides official agent skills out of the box. Run the following command to install the latest skills into your current directory:
+
+```bash
+curl -sL https://raw.githubusercontent.com/hardhackerlabs/podwise-cli/main/install-skills.sh | sh
+```
+
+You can also build your own skills on top of the `podwise` CLI to create custom workflows that fit your needs.
