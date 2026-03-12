@@ -8,7 +8,14 @@ Podwise transforms hours of podcasts into transcripts, summaries, outlines, Q&A,
 
 ## Installation
 
-#### Automatic (Recommended)
+#### Homebrew (macOS)
+
+```bash
+brew tap hardhackerlabs/podwise-tap
+brew install podwise
+```
+
+#### Automatic Script
 
 Run the following command to install the latest version of `podwise`:
 
