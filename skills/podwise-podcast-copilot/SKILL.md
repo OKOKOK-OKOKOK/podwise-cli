@@ -23,6 +23,8 @@ podwise --help
 podwise config show
 ```
 
+If `podwise` is not installed yet, load [references/installation.md](references/installation.md) for installation and initial configuration steps.
+
 ## Step 2: Choose the Workflow
 
 - If the user provides only a topic or episode title, run `podwise search "<query>" --limit 10` unless the user explicitly asks for a different number of results.
@@ -113,6 +115,8 @@ bash scripts/podwise_pipeline.sh "./meeting.m4a" "./podwise-output"
 - If `podwise` is missing or not configured correctly, stop immediately and tell the user to fix the CLI setup first.
 - If a local file does not exist or the extension is unsupported, stop and ask for a valid path or supported media format.
 
+Load [references/installation.md](references/installation.md) when the user needs help installing the CLI or setting the API key.
+
 ## Output Contract
 
 Always include:
@@ -123,3 +127,4 @@ Always include:
 4. Any unavailable artifact explicitly marked as unavailable.
 
 Load [references/commands.md](references/commands.md) when exact command examples are needed.
+Load [references/installation.md](references/installation.md) when setup or installation help is needed.
