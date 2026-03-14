@@ -26,3 +26,4 @@ vendor/
 .env.*
 *.mp3
 *.mp4
+SKILL_*.md

@@ -1,6 +1,6 @@
-# Podwise CLI 命令速查
+# Podwise CLI Command Reference
 
-## 1) 搜索节目
+## 1) Search Episodes
 
 ```bash
 podwise search "<query>"
@@ -8,7 +8,7 @@ podwise search "<query>" --limit 20
 podwise search "<query>" --json
 ```
 
-## 2) 处理来源链接
+## 2) Process Source URLs
 
 ```bash
 # Podwise episode URL
@@ -23,18 +23,18 @@ podwise process https://youtu.be/<id>
 
 # Local media file (.mp3 .wav .m4a .mp4 .m4v .mov .webm)
 podwise process ./interview.mp3
-podwise process ./meeting.wav --title "会议录音"
-podwise process ./demo.mp4 --title "发布会录屏" --hotwords "Podwise,LLM,ASR"
+podwise process ./meeting.wav --title "Meeting Recording"
+podwise process ./demo.mp4 --title "Product Launch Screen Recording" --hotwords "Podwise,LLM,ASR"
 ```
 
-## 3) 控制轮询与超时
+## 3) Control Polling and Timeout
 
 ```bash
 podwise process <url> --interval 30s --timeout 30m
 podwise process <url> --no-wait
 ```
 
-## 4) 拉取结果内容
+## 4) Fetch Result Content
 
 ```bash
 podwise get transcript <episode-url>
@@ -51,14 +51,14 @@ podwise get highlights <episode-url>
 podwise get keywords <episode-url>
 ```
 
-## 5) 强制刷新缓存
+## 5) Force Cache Refresh
 
 ```bash
 podwise get summary <episode-url> --refresh
 podwise get transcript <episode-url> --refresh
 ```
 
-## 6) 配置管理
+## 6) Configuration Management
 
 ```bash
 podwise config set api_key <your-sk-xxxx>
@@ -66,25 +66,25 @@ podwise config set api_base_url https://podwise.ai/api
 podwise config show
 ```
 
-## 7) 常用中文需求映射
+## 7) Common Use Case Mappings
 
 ```bash
-# 需求：处理链接并给摘要
+# Use case: Process a URL and retrieve its summary
 podwise process "<input-url>"
 podwise get summary "<resolved-episode-url>"
 
-# 需求：结构化复盘
+# Use case: Structured review and retrospective
 podwise get chapters "<resolved-episode-url>"
 podwise get highlights "<resolved-episode-url>"
 podwise get keywords "<resolved-episode-url>"
 
-# 需求：导出字幕
+# Use case: Export transcript / subtitles
 podwise get transcript "<resolved-episode-url>" --format text
 podwise get transcript "<resolved-episode-url>" --format srt
 podwise get transcript "<resolved-episode-url>" --format vtt
 
-# 需求：处理本地音视频文件
-podwise process "./meeting.m4a" --title "周会录音" --hotwords "产品,路线图"
+# Use case: Process a local audio/video file
+podwise process "./meeting.m4a" --title "Weekly Standup Recording" --hotwords "product,roadmap"
 podwise get summary "<resolved-episode-url>"
 podwise get transcript "<resolved-episode-url>" --format text
 ```

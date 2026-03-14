@@ -1,52 +1,48 @@
 ---
 name: podwise-podcast-processor
-description: 使用 podwise 对播客、YouTube、小宇宙和本地音视频文件进行转录总结处理的全流程：搜索节目、处理链接或本地文件、轮询处理状态、获取 transcript/summary/chapters/Q&A/mind map/highlights/keywords，并导出结构化结果。用户提出“处理播客”“整理节目内容”“提取字幕”“生成摘要”“YouTube 转文字”“小宇宙总结”“本地音频转文字”“本地视频提取要点”“podcast transcript/summary”等请求时使用。
-license: MIT
-metadata:
-  author: Podwise
-  version: "1.0"
+description: End-to-end podcast and media processing with podwise CLI: search episodes, process Podwise episode URLs, YouTube videos, Xiaoyuzhou episode links, and local audio or video files, wait for processing to finish, then retrieve transcript, summary, chapters, Q&A, mind map, highlights, and keywords. Use when the user asks to process a podcast, summarize an episode, extract subtitles or a transcript, turn YouTube into notes, summarize a Xiaoyuzhou episode, transcribe a local recording, or extract key points from a local video or audio file.
 ---
 
-# Podwise 播客节目处理助手
+# Podwise Podcast Processor
 
-使用这个 skill，把原始节目音视频转成可直接消费的结构化内容。
+Use this skill to turn raw podcast, video, and audio inputs into structured outputs that are easy to read, export, or reuse.
 
-## 工作目标
+## Goals
 
-1. 先确认 `podwise` 可用且 API Key 有效。
-2. 根据输入选择 `search`、`process` 或 `get` 路径。
-3. 只有`process`退出, 且状态到 `done` 才拉取 AI 结果。
-4. 输出时始终带上 episode URL 和状态说明。
+1. Verify that `podwise` is installed and that the API key is configured.
+2. Choose the correct path: `search`, `process`, or `get`.
+3. Fetch AI outputs only after `process` completes successfully and reaches `done`.
+4. Always return the Podwise episode URL and the current processing status with the results.
 
-## 第一步：环境检查
+## Step 1: Check the Environment
 
-运行：
+Run:
 
 ```bash
 podwise --help
 podwise config show
 ```
 
-## 第二步：选择流程
+## Step 2: Choose the Workflow
 
-- 用户只给关键词或节目名：运行 `podwise search`。
-- 用户给 YouTube / 小宇宙链接：运行 `podwise process <url>`（会自动导入）。
-- 用户给本地音视频文件路径：运行 `podwise process <file>`（会自动上传并生成 episode）。
-- 用户给 Podwise episode URL：如果不确定已处理完成，先 `podwise process <episode-url>`。
-- 用户只要已知节目的某类结果：直接 `podwise get <type> <episode-url>`。
+- If the user provides only a topic or episode title, run `podwise search`.
+- If the user provides a YouTube or Xiaoyuzhou URL, run `podwise process <url>`; Podwise will import it automatically.
+- If the user provides a local audio or video file path, run `podwise process <file>`; Podwise will upload it and create an episode automatically.
+- If the user provides a Podwise episode URL and processing may not be complete yet, run `podwise process <episode-url>`.
+- If the user wants a specific artifact for an already processed episode, run `podwise get <type> <episode-url>` directly.
 
-## 第三步：执行命令
+## Step 3: Run the Commands
 
-### 搜索节目
+### Search for Episodes
 
 ```bash
 podwise search "Hard Fork"
 podwise search "AI agent" --json
 ```
 
-需要给下游程序解析时，使用 `--json`。
+Use `--json` when the output will be parsed by another tool or step.
 
-### 处理节目或视频
+### Process an Episode, Video, or Local File
 
 ```bash
 podwise process https://podwise.ai/dashboard/episodes/7360326
@@ -54,14 +50,15 @@ podwise process https://www.youtube.com/watch?v=d0-Gn_Bxf8s
 podwise process https://youtu.be/d0-Gn_Bxf8s
 podwise process https://www.xiaoyuzhoufm.com/episode/abc123
 podwise process ./interview.mp3
-podwise process ./meeting.wav --title "产品复盘会"
-podwise process ./demo.mp4 --title "发布会录屏" --hotwords "Podwise,LLM,ASR"
+podwise process ./meeting.wav --title "Product Review Meeting"
+podwise process ./demo.mp4 --title "Launch Demo Recording" --hotwords "Podwise,LLM,ASR"
 ```
 
-`process` 过程会持续自动轮询处理进度和状态，直到结束才退出返回。
-本地文件可用扩展名：`.mp3 .wav .m4a .mp4 .m4v .mov .webm`。
+`process` automatically polls the processing status until it finishes and exits.
 
-### 获取 AI 结果
+Supported local file extensions: `.mp3 .wav .m4a .mp4 .m4v .mov .webm`.
+
+### Retrieve AI Outputs
 
 ```bash
 podwise get transcript <episode-url>
@@ -73,50 +70,52 @@ podwise get highlights <episode-url>
 podwise get keywords <episode-url>
 ```
 
-注意：`get` 获取结果只能接受 podwise episode url 作为参数，不能是 Youtube 和小宇宙链接。`get` 结果将直接打印到标准输出。
-本地文件输入同理：先 `process <file>`，再使用处理产出的 podwise episode URL 执行 `get`。
+`podwise get` accepts only a Podwise episode URL. Do not pass a YouTube URL, a Xiaoyuzhou URL, or a local file path to `get`.
 
-## 中文请求到命令的映射
+For local files, follow the same pattern: run `process <file>` first, then use the resulting Podwise episode URL with `get`.
 
-- “帮我处理这个 YouTube 并输出字幕和摘要”：`process` + `get transcript` + `get summary`。
-- “按主题找几期播客”：`search "<主题>" --limit <n>`。
-- “导出字幕文件”：`get transcript --format srt` 或 `--format vtt`。
-- “给我结构化复盘”：`get summary` + `get chapters` + `get highlights` + `get keywords`。
-- “把本地录音/视频转文字并提炼重点”：`process <file>` + `get transcript` + `get summary`。
+## User Request to Command Mapping
 
-## 一键脚本（推荐）
+- "Process this YouTube video and give me the transcript and summary" -> `process` + `get transcript` + `get summary`
+- "Find a few podcast episodes about this topic" -> `search "<topic>" --limit <n>`
+- "Export subtitles" -> `get transcript --format srt` or `get transcript --format vtt`
+- "Give me a structured recap" -> `get summary` + `get chapters` + `get highlights` + `get keywords`
+- "Transcribe this local recording/video and extract the key points" -> `process <file>` + `get transcript` + `get summary`
 
-使用 [scripts/podwise_pipeline.sh](scripts/podwise_pipeline.sh) 自动完成：
+## One-Step Script
 
-1. 处理输入（Podwise URL / YouTube URL / 小宇宙 URL / 本地音视频文件）。
-2. 导出 transcript/summary/chapters/qa/mindmap/highlights/keywords。
+Use [scripts/podwise_pipeline.sh](scripts/podwise_pipeline.sh) to automate the full flow:
 
-运行：
+1. Process the input.
+2. Export transcript, summary, chapters, Q&A, mind map, highlights, and keywords.
+
+Run:
 
 ```bash
 bash scripts/podwise_pipeline.sh "<episode-url|video-url|local-file-path>" "<output-dir>"
 ```
 
-默认输出目录：`./podwise-output`。
-可选环境变量（仅本地文件常用）：
+Default output directory: `./podwise-output`.
+
+Optional environment variables, mainly useful for local file uploads:
 
 ```bash
-PODWISE_PROCESS_TITLE="会议纪要录音" PODWISE_PROCESS_HOTWORDS="Podwise,Agent,ASR" \
+PODWISE_PROCESS_TITLE="Weekly Meeting Recording" PODWISE_PROCESS_HOTWORDS="Podwise,Agent,ASR" \
 bash scripts/podwise_pipeline.sh "./meeting.m4a" "./podwise-output"
 ```
 
-## 常见错误处理
+## Common Failure Cases
 
-- 找不到 `podwise` cli 工具或未正确配置，提示用户并直接终止流程执行。安装文档： https://github.com/hardhackerlabs/podwise-cli
-- 本地文件不存在或扩展名不支持（仅支持 `.mp3 .wav .m4a .mp4 .m4v .mov .webm`），直接终止并提示修正输入路径/格式。
+- If `podwise` is missing or not configured correctly, stop immediately and tell the user to fix the CLI setup first.
+- If a local file does not exist or the extension is unsupported, stop and ask for a valid path or supported media format.
 
-## 输出格式约定
+## Output Contract
 
-返回结果时至少包含：
+Always include:
 
-1. 解析后的 episode URL。
-2. 当前处理状态。
-3. 用户请求的内容块（summary/transcript 等）。
-4. 缺失内容明确标记为 unavailable。
+1. The resolved Podwise episode URL.
+2. The current processing status.
+3. The requested artifacts such as summary or transcript.
+4. Any unavailable artifact explicitly marked as unavailable.
 
-需要完整命令清单时，读取 [references/commands.md](references/commands.md)。
+Load [references/commands.md](references/commands.md) when exact command examples are needed.
