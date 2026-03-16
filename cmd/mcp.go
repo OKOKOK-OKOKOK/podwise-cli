@@ -21,8 +21,8 @@ var mcpCmd = &cobra.Command{
 	Long: `Start an MCP (Model Context Protocol) server that exposes Podwise functionality as tools.
 
 The server communicates over stdin/stdout using the MCP protocol, allowing AI assistants
-such as Cursor and Claude to search episodes, process media, and retrieve AI-generated
-content (transcripts, summaries, chapters, Q&A, mind maps, highlights, keywords).`,
+to search episodes, process media, and retrieve AI-generated content (transcripts, summaries, 
+chapters, Q&A, mind maps, highlights, keywords).`,
 	Example: `  podwise mcp`,
 	Args:    cobra.NoArgs,
 	RunE:    runMCP,

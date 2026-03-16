@@ -47,9 +47,6 @@ func (r *SearchResult) FormatText(query string) string {
 		fmt.Fprintf(&sb, "- **Podcast:** %s\n", hit.PodcastName)
 		fmt.Fprintf(&sb, "- **Published:** %s\n", publishDate)
 		fmt.Fprintf(&sb, "- **Episode URL:** %s\n", BuildEpisodeURL(hit.Seq))
-		if hit.Content != "" {
-			fmt.Fprintf(&sb, "\n> %s\n", hit.Content)
-		}
 		sb.WriteString("\n---\n")
 	}
 	return sb.String()
@@ -75,7 +72,6 @@ func (r *SearchResult) FormatJSON() ([]byte, error) {
 			PodcastName: hit.PodcastName,
 			PublishDate: time.Unix(hit.PublishTime, 0).Format("2006-01-02"),
 			EpisodeURL:  BuildEpisodeURL(hit.Seq),
-			Description: hit.Content,
 		})
 	}
 	return json.MarshalIndent(hits, "", "  ")
