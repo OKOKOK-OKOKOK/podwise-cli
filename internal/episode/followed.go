@@ -25,7 +25,7 @@ type FollowedEpisode struct {
 	PublishTime int64   `json:"publishTime"`
 	Link        string  `json:"link"`
 	LinkType    string  `json:"linkType"`
-	Duration    *string `json:"duration"`
+	Duration    int     `json:"duration"`
 	Transcribed bool    `json:"transcribed"`
 	Language    *string `json:"language"`
 }
@@ -49,9 +49,7 @@ func (r *FollowedResult) FormatText(date string, days int) string {
 		fmt.Fprintf(&sb, "\n%d. %s\n\n", i+1, ep.Title)
 		fmt.Fprintf(&sb, "- **Podcast:** %s\n", ep.PodcastName)
 		fmt.Fprintf(&sb, "- **Published:** %s\n", publishDate)
-		if ep.Duration != nil && *ep.Duration != "" {
-			fmt.Fprintf(&sb, "- **Duration:** %s\n", *ep.Duration)
-		}
+		fmt.Fprintf(&sb, "- **Duration:** %s\n", utils.FormatDuration(time.Duration(ep.Duration)*time.Second))
 		if ep.Language != nil && *ep.Language != "" {
 			fmt.Fprintf(&sb, "- **Language:** %s\n", *ep.Language)
 		}
@@ -82,12 +80,13 @@ type FollowedEpisodeJSON struct {
 func (r *FollowedResult) FormatJSON() ([]byte, error) {
 	items := make([]FollowedEpisodeJSON, 0, len(r.Episodes))
 	for _, ep := range r.Episodes {
+		duration := utils.FormatDuration(time.Duration(ep.Duration) * time.Second)
 		items = append(items, FollowedEpisodeJSON{
 			Title:       ep.Title,
 			PodcastName: ep.PodcastName,
 			PublishDate: time.Unix(ep.PublishTime, 0).Format("2006-01-02"),
 			EpisodeURL:  BuildEpisodeURL(ep.Seq),
-			Duration:    ep.Duration,
+			Duration:    &duration,
 			Language:    ep.Language,
 			Processed:   ep.Transcribed,
 		})
@@ -110,11 +109,6 @@ func FetchFollowedEpisodes(ctx context.Context, client *api.Client, date string,
 	var resp followedResponse
 	if err := client.Get(ctx, "/open/v1/user/episodes/followed", q, &resp); err != nil {
 		return nil, err
-	}
-	for i := range resp.Result {
-		if resp.Result[i].Duration != nil {
-			*resp.Result[i].Duration = utils.NormalizeDurationString(*resp.Result[i].Duration)
-		}
 	}
 	return &FollowedResult{Episodes: resp.Result}, nil
 }

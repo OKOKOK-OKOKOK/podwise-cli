@@ -26,7 +26,7 @@ type PodcastEpisode struct {
 	PublishTime int64   `json:"publishTime"`
 	Link        string  `json:"link"`
 	LinkType    string  `json:"linkType"`
-	Duration    *string `json:"duration"`
+	Duration    int     `json:"duration"`
 	Transcribed bool    `json:"transcribed"`
 	Language    *string `json:"language"`
 }
@@ -52,9 +52,7 @@ func (r *PodcastEpisodesResult) FormatText(date string, days int) string {
 		publishDate := time.Unix(ep.PublishTime, 0).Format("2006-01-02")
 		fmt.Fprintf(&sb, "\n%d. %s\n\n", i+1, ep.Title)
 		fmt.Fprintf(&sb, "- **Published:** %s\n", publishDate)
-		if ep.Duration != nil && *ep.Duration != "" {
-			fmt.Fprintf(&sb, "- **Duration:** %s\n", *ep.Duration)
-		}
+		fmt.Fprintf(&sb, "- **Duration:** %s\n", utils.FormatDuration(time.Duration(ep.Duration)*time.Second))
 		if ep.Language != nil && *ep.Language != "" {
 			fmt.Fprintf(&sb, "- **Language:** %s\n", *ep.Language)
 		}
@@ -83,11 +81,12 @@ type PodcastEpisodeJSON struct {
 func (r *PodcastEpisodesResult) FormatJSON() ([]byte, error) {
 	items := make([]PodcastEpisodeJSON, 0, len(r.Episodes))
 	for _, ep := range r.Episodes {
+		duration := utils.FormatDuration(time.Duration(ep.Duration) * time.Second)
 		items = append(items, PodcastEpisodeJSON{
 			Title:       ep.Title,
 			PublishDate: time.Unix(ep.PublishTime, 0).Format("2006-01-02"),
 			EpisodeURL:  fmt.Sprintf("https://podwise.ai/dashboard/episodes/%d", ep.Seq),
-			Duration:    ep.Duration,
+			Duration:    &duration,
 			Language:    ep.Language,
 			Processed:   ep.Transcribed,
 		})
@@ -111,11 +110,6 @@ func FetchPodcastEpisodes(ctx context.Context, client *api.Client, podcastSeq in
 	var resp podcastEpisodesResponse
 	if err := client.Get(ctx, path, q, &resp); err != nil {
 		return nil, err
-	}
-	for i := range resp.Result {
-		if resp.Result[i].Duration != nil {
-			*resp.Result[i].Duration = utils.NormalizeDurationString(*resp.Result[i].Duration)
-		}
 	}
 	return &PodcastEpisodesResult{PodcastSeq: podcastSeq, Episodes: resp.Result}, nil
 }
