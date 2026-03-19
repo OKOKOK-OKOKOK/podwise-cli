@@ -72,11 +72,10 @@ podwise process ./meeting.wav --title "Meeting Recording"
 podwise process ./demo.mp4 --title "Product Launch Screen Recording" --hotwords "Podwise,LLM,ASR"
 ```
 
-## 6) Control Polling and Timeout
+## 6) Polling and Timeout
 
 ```bash
 podwise process <url> --interval 30s --timeout 30m
-podwise process <url> --no-wait
 ```
 
 ## 7) Fetch Result Content

@@ -204,7 +204,6 @@ func mcpSearchPodcast(ctx context.Context, req *mcp.CallToolRequest, in mcpSearc
 
 type mcpProcessInput struct {
 	Input    string `json:"input"              jsonschema:"Podwise episode URL / YouTube URL / Xiaoyuzhou URL / local file path"`
-	NoWait   bool   `json:"no_wait,omitempty"  jsonschema:"if true submit and return immediately without waiting for completion"`
 	Title    string `json:"title,omitempty"    jsonschema:"episode title for local file uploads (defaults to filename)"`
 	Hotwords string `json:"hotwords,omitempty" jsonschema:"comma-separated hotwords to improve transcription accuracy (local files only)"`
 }
@@ -244,7 +243,7 @@ func mcpProcess(ctx context.Context, req *mcp.CallToolRequest, in mcpProcessInpu
 		return nil, struct{}{}, err
 	}
 
-	if in.NoWait || processResult.Status == "done" {
+	if processResult.Status == "done" {
 		fmt.Fprintf(&sb, "Status: %s\n", processResult.Status)
 		return textResult(sb.String()), struct{}{}, nil
 	}

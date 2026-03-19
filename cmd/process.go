@@ -13,7 +13,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var processNoWait bool
 var processPollInterval time.Duration
 var processTimeout time.Duration
 var processTitle string
@@ -55,7 +54,6 @@ Status values:
 }
 
 func init() {
-	processCmd.Flags().BoolVar(&processNoWait, "no-wait", false, "submit and return immediately without polling for completion")
 	processCmd.Flags().DurationVar(&processPollInterval, "interval", 30*time.Second, "how often to poll for status updates (min 30s)")
 	processCmd.Flags().DurationVar(&processTimeout, "timeout", 30*time.Minute, "maximum time to wait for processing to complete")
 	processCmd.Flags().StringVar(&processTitle, "title", "", "episode title for local file uploads (defaults to filename without extension)")
@@ -123,10 +121,8 @@ func runProcess(cmd *cobra.Command, args []string) error {
 	}
 	printProcessStatus(result, initialProgress)
 
-	if processNoWait || result.Status == "done" {
-		if result.Status == "done" {
-			printProcessDoneHint(seq, time.Since(startTime))
-		}
+	if result.Status == "done" {
+		printProcessDoneHint(seq, time.Since(startTime))
 		return nil
 	}
 

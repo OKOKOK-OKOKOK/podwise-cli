@@ -116,7 +116,7 @@ podwise process ./meeting.wav --title "Product Review Meeting"
 podwise process ./demo.mp4 --title "Launch Demo Recording" --hotwords "Podwise,LLM,ASR"
 ```
 
-`process` automatically polls the processing status until it finishes and exits.
+`process` always waits for processing to finish before it exits.
 
 Supported local file extensions: `.mp3 .wav .m4a .mp4 .m4v .mov .webm`.
 
