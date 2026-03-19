@@ -27,3 +27,5 @@ vendor/
 *.mp3
 *.mp4
 SKILL_*.md
+.cursor/
+.gocache/

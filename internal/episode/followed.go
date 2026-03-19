@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hardhacker/podwise-cli/internal/api"
+	"github.com/hardhacker/podwise-cli/internal/utils"
 )
 
 // FollowedEpisode is a single episode from a podcast the user has followed.
@@ -109,6 +110,11 @@ func FetchFollowedEpisodes(ctx context.Context, client *api.Client, date string,
 	var resp followedResponse
 	if err := client.Get(ctx, "/open/v1/user/episodes/followed", q, &resp); err != nil {
 		return nil, err
+	}
+	for i := range resp.Result {
+		if resp.Result[i].Duration != nil {
+			*resp.Result[i].Duration = utils.NormalizeDurationString(*resp.Result[i].Duration)
+		}
 	}
 	return &FollowedResult{Episodes: resp.Result}, nil
 }

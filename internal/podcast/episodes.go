@@ -11,6 +11,7 @@ import (
 
 	"github.com/hardhacker/podwise-cli/internal/api"
 	"github.com/hardhacker/podwise-cli/internal/episode"
+	"github.com/hardhacker/podwise-cli/internal/utils"
 )
 
 // PodcastEpisode is a single episode returned when listing a podcast's episodes.
@@ -110,6 +111,11 @@ func FetchPodcastEpisodes(ctx context.Context, client *api.Client, podcastSeq in
 	var resp podcastEpisodesResponse
 	if err := client.Get(ctx, path, q, &resp); err != nil {
 		return nil, err
+	}
+	for i := range resp.Result {
+		if resp.Result[i].Duration != nil {
+			*resp.Result[i].Duration = utils.NormalizeDurationString(*resp.Result[i].Duration)
+		}
 	}
 	return &PodcastEpisodesResult{PodcastSeq: podcastSeq, Episodes: resp.Result}, nil
 }

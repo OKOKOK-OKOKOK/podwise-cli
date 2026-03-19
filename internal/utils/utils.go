@@ -2,6 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -31,4 +33,24 @@ func FormatDuration(d time.Duration) string {
 	default:
 		return fmt.Sprintf("%ds", s)
 	}
+}
+
+// NormalizeDurationString converts a numeric duration string in seconds
+// into HH:MM:SS. Non-numeric values are returned unchanged.
+func NormalizeDurationString(value string) string {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return value
+	}
+
+	seconds, err := strconv.ParseFloat(trimmed, 64)
+	if err != nil || seconds < 0 {
+		return value
+	}
+
+	totalSeconds := int(seconds)
+	h := totalSeconds / 3600
+	m := (totalSeconds % 3600) / 60
+	s := totalSeconds % 60
+	return fmt.Sprintf("%02d:%02d:%02d", h, m, s)
 }
