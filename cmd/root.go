@@ -99,6 +99,8 @@ func init() {
 	rootCmd.AddCommand(popularCmd)
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(drillCmd)
+	rootCmd.AddCommand(followCmd)
+	rootCmd.AddCommand(unfollowCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(mcpCmd)
 }

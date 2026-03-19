@@ -22,13 +22,13 @@ var drillCmd = &cobra.Command{
 	Short: "Drill into a podcast and list its recent episodes",
 	Long: `Drill into a specific podcast and list its episodes within a date range, sorted by publish time (newest first).
 
-The podcast-url must be a Podwise podcast URL, e.g. https://podwise.ai/dashboard/podcasts/397.
+The podcast-url must be a Podwise podcast URL, e.g. https://podwise.ai/dashboard/podcasts/386.
 
 With no flags, shows episodes from the last 30 days ending today by default.
 Use --latest N to look back N days ending today (max 365).`,
-	Example: `  podwise drill https://podwise.ai/dashboard/podcasts/397
-  podwise drill https://podwise.ai/dashboard/podcasts/397 --latest 90
-  podwise drill https://podwise.ai/dashboard/podcasts/397 --latest 90 --json`,
+	Example: `  podwise drill https://podwise.ai/dashboard/podcasts/386
+  podwise drill https://podwise.ai/dashboard/podcasts/386 --latest 90
+  podwise drill https://podwise.ai/dashboard/podcasts/386 --latest 90 --json`,
 	Args: cobra.ExactArgs(1),
 	RunE: runDrill,
 }
