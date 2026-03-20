@@ -161,8 +161,8 @@ The server exposes the following tools:
 | `drill`                  | List recent episodes for a specific podcast by its Podwise URL                 |
 | `follow`                 | Follow a podcast by its Podwise URL (idempotent)                               |
 | `unfollow`               | Unfollow a podcast by its Podwise URL (idempotent)                             |
-| `list_followed_episodes` | List recent episodes from podcasts you follow, filterable by date or day range |
-| `list_followed_podcasts` | List followed podcasts with new episodes, filterable by date or day range      |
+| `list_episodes`          | List recent episodes from podcasts you follow, filterable by date or day range |
+| `list_podcasts`          | List followed podcasts with new episodes, filterable by date or day range      |
 
 #### Install
 

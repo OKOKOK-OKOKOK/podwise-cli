@@ -7,8 +7,10 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hardhacker/podwise-cli/internal/api"
+	"github.com/hardhacker/podwise-cli/internal/utils"
 )
 
 // PopularEpisode is a single entry in the trending/popular episodes list.
@@ -21,6 +23,7 @@ type PopularEpisode struct {
 	Cover       string  `json:"cover"`
 	EpCover     *string `json:"epCover"`
 	LinkType    string  `json:"linkType"`
+	Duration    int     `json:"duration"`
 }
 
 // PopularResult holds the list of popular episodes returned by the API.
@@ -40,6 +43,7 @@ func (r *PopularResult) FormatText() string {
 		fmt.Fprintf(&sb, "\n%d. %s\n\n", i+1, ep.Title)
 		fmt.Fprintf(&sb, "- **Podcast:** %s\n", ep.PodcastName)
 		fmt.Fprintf(&sb, "- **Episode URL:** %s\n", BuildEpisodeURL(ep.Seq))
+		fmt.Fprintf(&sb, "- **Duration:** %s\n", utils.FormatDuration(time.Duration(ep.Duration)*time.Second))
 		if ep.LinkType == "youtube" {
 			fmt.Fprintf(&sb, "- **Is YouTube:** %s\n", "Yes")
 		} else {
@@ -55,6 +59,7 @@ type PopularEpisodeJSON struct {
 	Title       string `json:"title"`
 	PodcastName string `json:"podcast_name"`
 	EpisodeURL  string `json:"episode_url"`
+	Duration    string `json:"duration"`
 	IsYouTube   string `json:"is_youtube"`
 }
 
@@ -72,6 +77,7 @@ func (r *PopularResult) FormatJSON() ([]byte, error) {
 			PodcastName: ep.PodcastName,
 			EpisodeURL:  BuildEpisodeURL(ep.Seq),
 			IsYouTube:   isYouTube,
+			Duration:    utils.FormatDuration(time.Duration(ep.Duration) * time.Second),
 		})
 	}
 	return json.MarshalIndent(items, "", "  ")

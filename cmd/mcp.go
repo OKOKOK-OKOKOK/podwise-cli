@@ -99,14 +99,14 @@ func runMCP(cmd *cobra.Command, args []string) error {
 	}, mcpUnfollow)
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "list_followed_episodes",
+		Name:        "list_episodes",
 		Description: "List recent episodes from podcasts the authenticated user follows, sorted by publish time (newest first). Use 'date' to filter by a specific day (today, yesterday, or YYYY-MM-DD), or 'latest' to look back N days ending today (max 30, default 7).",
-	}, mcpListFollowedEpisodes)
+	}, mcpListEpisodes)
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "list_followed_podcasts",
+		Name:        "list_podcasts",
 		Description: "List followed podcasts that have new episodes within a date range, sorted by last publish time (newest first). Use 'date' to filter by a specific day (today, yesterday, or YYYY-MM-DD), or 'latest' to look back N days ending today (max 30, default 7).",
-	}, mcpListFollowedPodcasts)
+	}, mcpListPodcasts)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "popular",
@@ -493,14 +493,14 @@ func mcpUnfollow(ctx context.Context, req *mcp.CallToolRequest, in mcpPodcastInp
 	return textResult(fmt.Sprintf("Unfollowed podcast %s", podcast.BuildPodcastURL(seq))), struct{}{}, nil
 }
 
-// ─── Tool: list_followed_episodes ─────────────────────────────────────────────
+// ─── Tool: list_episodes ──────────────────────────────────────────────────────
 
-type mcpListFollowedInput struct {
+type mcpListInput struct {
 	Date   string `json:"date,omitempty"   jsonschema:"specific day to filter by: today, yesterday, or YYYY-MM-DD (takes priority over latest)"`
 	Latest int    `json:"latest,omitempty" jsonschema:"look back N days ending today (1-30, default 7); ignored when date is set"`
 }
 
-func mcpListFollowedEpisodes(ctx context.Context, req *mcp.CallToolRequest, in mcpListFollowedInput) (*mcp.CallToolResult, struct{}, error) {
+func mcpListEpisodes(ctx context.Context, req *mcp.CallToolRequest, in mcpListInput) (*mcp.CallToolResult, struct{}, error) {
 	date, days, err := resolveListDateDays(in.Date, in.Latest, 30)
 	if err != nil {
 		return nil, struct{}{}, err
@@ -516,9 +516,9 @@ func mcpListFollowedEpisodes(ctx context.Context, req *mcp.CallToolRequest, in m
 	return textResult(result.FormatText(date, days)), struct{}{}, nil
 }
 
-// ─── Tool: list_followed_podcasts ─────────────────────────────────────────────
+// ─── Tool: list_podcasts ──────────────────────────────────────────────────────
 
-func mcpListFollowedPodcasts(ctx context.Context, req *mcp.CallToolRequest, in mcpListFollowedInput) (*mcp.CallToolResult, struct{}, error) {
+func mcpListPodcasts(ctx context.Context, req *mcp.CallToolRequest, in mcpListInput) (*mcp.CallToolResult, struct{}, error) {
 	date, days, err := resolveListDateDays(in.Date, in.Latest, 30)
 	if err != nil {
 		return nil, struct{}{}, err

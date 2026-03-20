@@ -1,6 +1,6 @@
 ---
 name: podwise-podcast-copilot
-description: "Podcast copilot workflows with podwise CLI: discover episodes and podcasts, monitor followed shows for new releases, find current popular episodes, ask AI questions across podcast transcripts with citations, process Podwise episode URLs, YouTube videos, Xiaoyuzhou episode links, and local audio or video files, then retrieve transcript, summary, chapters, Q&A, mind map, highlights, and keywords. Use when the user asks to find podcast episodes, discover hot shows, check subscription updates, research a topic across podcasts, ask questions grounded in transcripts, summarize an episode, extract subtitles or a transcript, turn YouTube into notes, summarize a Xiaoyuzhou episode, transcribe a local recording, or extract key points from a local video or audio file."
+description: "Podcast copilot workflows with podwise CLI: search podcasts or episodes by keyword, monitor followed shows for new releases, find current popular episodes, ask questions or extract insights by searching across podcast transcript content, process Podwise episode URLs, YouTube videos, Xiaoyuzhou episode links, and local audio or video files, then retrieve transcript, summary, chapters, Q&A, mind map, highlights, and keywords. Use when the user asks to find podcasts or episodes by name/topic/keyword, discover hot shows, check subscription updates, answer a question from podcast transcripts, synthesize transcript-grounded insights across podcasts, summarize an episode, extract subtitles or a transcript, turn YouTube into notes, summarize a Xiaoyuzhou episode, transcribe a local recording, or extract key points from a local video or audio file."
 ---
 
 # Podwise Podcast Copilot
@@ -10,9 +10,10 @@ Use this skill to turn raw podcast, video, and audio inputs into structured outp
 ## Goals
 
 1. Verify that `podwise` is installed and that the API key is configured.
-2. Choose the correct path: `search`, `list`, `popular`, `ask`, `process`, or `get`.
-3. Fetch AI outputs only after `process` completes successfully and reaches `done`.
-4. Return output in the shape that matches the workflow: discovery lists, transcript-grounded answers, or episode artifacts.
+2. Distinguish keyword discovery from transcript-grounded answering, then choose the correct path: `search`, `list`, `popular`, `ask`, `process`, or `get`.
+3. Ask for user confirmation before any `process` command because it consumes quota/credits, unless the user explicitly asked to proceed without pausing.
+4. Fetch AI outputs only after `process` completes successfully and reaches `done`.
+5. Return output in the shape that matches the workflow: discovery lists, transcript-grounded answers, or episode artifacts.
 
 ## Step 1: Check the Environment
 
@@ -23,23 +24,42 @@ podwise --help
 podwise config show
 ```
 
+Treat `podwise --help` and `podwise <command> --help` as the source of truth for exact flags, subcommands, and examples.
+
+When a workflow needs command details beyond this skill, inspect help progressively:
+
+```bash
+podwise search --help
+podwise search episode --help
+podwise search podcast --help
+podwise ask --help
+podwise list --help
+podwise process --help
+podwise get --help
+podwise get transcript --help
+```
+
 If `podwise` is not installed yet, load [references/installation.md](references/installation.md) for installation and initial configuration steps.
 
 ## Step 2: Choose the Workflow
 
 ### Discover Content, Podcasts, Episodes
 
-- If the user wants to find episodes by title keywords, run `podwise search "<query>" --limit 10` or `podwise search episode "<query>" --limit 10`. Both search episode titles, and the direct `search "<query>"` form is backward-compatible shorthand for `search episode`.
-- If the user wants to find shows or podcast feeds by podcast name, run `podwise search podcast "<query>" --limit 10`.
-- If the user wants to discover what is currently trending across Podwise, run `podwise popular`, optionally with `--limit` or `--json`.
-- If the user wants to check updates from podcasts they already follow, run `podwise list followed-episodes` or `podwise list followed-podcasts`.
-- If the user wants a transcript-grounded answer across podcasts, run `podwise ask "<question>"`. Add `--sources` when they need cited excerpts and episode links.
+- Use `search` when the user wants matching podcasts or episodes returned as results to browse.
+- Use `ask` when the user wants an answer, synthesis, or insights derived from transcript content across podcasts.
+- If the user wants to find episodes by keyword, or title, run `podwise search episode`.
+- If the user wants to find shows or feeds by podcast name or keyword, run `podwise search podcast`.
+- If the user asks what podcasts say about a topic, asks for takeaways, or wants transcript-grounded analysis, run `podwise ask`.
+- If the user wants to discover what is currently trending across Podwise, run `podwise popular`.
+- If the user wants to check updates from podcasts they already follow, run `podwise list episodes` or `podwise list podcasts`.
 
 ### Process an Episode
 
-- If the user provides a YouTube or Xiaoyuzhou URL, run `podwise process <url>`; Podwise will import it automatically.
-- If the user provides a local audio or video file path, run `podwise process <file>`; Podwise will upload it and create an episode automatically.
-- If the user provides a Podwise episode URL and processing may not be complete yet, run `podwise process <episode-url>`.
+- Before running any `process` command, ask whether the user wants to spend quota/credits on processing.
+- Skip that confirmation only when the user already made the intent explicit, for example by saying to process it now or not to pause for confirmation.
+- If the user provides a YouTube or Xiaoyuzhou URL and confirms processing, run `podwise process <url>`; Podwise will import it automatically.
+- If the user provides a local audio or video file path and confirms processing, run `podwise process <file>`; Podwise will upload it and create an episode automatically.
+- If the user provides a Podwise episode URL and processing may not be complete yet, ask for confirmation first, then run `podwise process <episode-url>`.
 
 ### Retrieve AI Results
 
@@ -50,19 +70,15 @@ If `podwise` is not installed yet, load [references/installation.md](references/
 ### Search for Episodes or Podcasts
 
 ```bash
-podwise search "Hard Fork" --limit 10
 podwise search episode "AI agent" --limit 10 --json
-podwise search podcast "Lex Fridman" --limit 10
-podwise search podcast "AI" --json
+podwise search podcast "Lex Fridman" --limit 10 --json
 ```
-
-Default to `--limit 10` for search results unless the user explicitly requests a different limit.
-
-`--limit` has a maximum of `50`.
 
 Use `--json` when the output will be parsed by another tool or step.
 
-Use episode search when the user is looking for a specific episode, episode topic, or episode title keywords.
+Use `search` when the user wants a list of matching podcasts or episodes, not a synthesized answer.
+
+Use episode search when the user is looking for a specific episode, or episode title keywords.
 
 Use podcast search when the user is looking for a show by name, wants candidate podcasts to subscribe to, or is trying to identify the podcast behind an episode.
 
@@ -71,7 +87,6 @@ Multiple words are treated as a single phrase; pass them together as one quoted 
 ### Discover Popular Episodes
 
 ```bash
-podwise popular
 podwise popular --json
 ```
 
@@ -80,19 +95,19 @@ Use `popular` when the user wants hot, trending, or currently popular episodes r
 ### Check Followed Podcast Updates
 
 ```bash
-podwise list followed-episodes
-podwise list followed-episodes --date today
-podwise list followed-episodes --date yesterday
-podwise list followed-episodes --date 2026-03-01
-podwise list followed-episodes --latest 7 --json
-podwise list followed-podcasts
-podwise list followed-podcasts --date today
-podwise list followed-podcasts --latest 14 --json
+podwise list episodes --json
+podwise list episodes --json --date today
+podwise list episodes --json --date yesterday
+podwise list episodes --json --date 2026-03-01 
+podwise list episodes --json --latest 7
+podwise list podcasts --json
+podwise list podcasts --json --date today
+podwise list podcasts --json --latest 14
 ```
 
-Use `list followed-episodes` to see new episodes published by shows the user follows.
+Use `list episodes` to see new episodes published by shows the user follows.
 
-Use `list followed-podcasts` to see which followed podcasts have had recent updates.
+Use `list podcasts` to see which followed podcasts have had recent updates.
 
 ### Ask Questions Across Podcast Transcripts
 
@@ -100,7 +115,9 @@ Use `list followed-podcasts` to see which followed podcasts have had recent upda
 podwise ask "the future of AI agents"
 ```
 
-Use `ask` when the user wants a synthesized answer grounded in podcast transcripts rather than a simple list of episodes.
+Use `ask` when the user wants a synthesized answer, takeaways, comparison, or insights grounded in podcast transcripts rather than a list of matching episodes.
+
+Do not use `ask` when the user only wants to locate podcasts or episodes by keyword; use `search` for that.
 
 `ask` may take up to about `60s` because Podwise searches transcripts and generates an answer.
 
@@ -117,6 +134,8 @@ podwise process ./demo.mp4 --title "Launch Demo Recording" --hotwords "Podwise,L
 ```
 
 `process` always waits for processing to finish before it exits.
+
+Because `process` consumes quota/credits, do not run it silently. Confirm with the user first unless they explicitly asked to proceed without pausing.
 
 Supported local file extensions: `.mp3 .wav .m4a .mp4 .m4v .mov .webm`.
 
@@ -138,26 +157,24 @@ For local files, follow the same pattern: run `process <file>` first, then use t
 
 ## User Request to Command Mapping
 
-- "What podcasts or episodes should I look at right now?" -> `popular`
-- "What new episodes came out from podcasts I follow today?" -> `list followed-episodes --date today`
-- "Which followed podcasts updated this week?" -> `list followed-podcasts --latest 7`
-- "Answer this topic question using podcast transcripts" -> `ask "<question>"`
-- Add `--sources` when the user wants the supporting excerpts and episode links.
-- "Process this YouTube video and give me the transcript and summary" -> `process` + `get transcript` + `get summary`
-- "Find a few podcast episodes about this topic" -> `search episode "<topic>" --limit 10`
-- "Find podcasts named Lex Fridman" -> `search podcast "Lex Fridman" --limit 10`
-- "Search for episodes" without an explicit subcommand -> `search "<query>" --limit 10`, which behaves the same as `search episode "<query>" --limit 10`
-- If the user explicitly asks for a different number of search results, use that number instead of `10`.
-- "Export subtitles" -> `get transcript --format srt` or `get transcript --format vtt`
-- "Give me a structured recap" -> `get summary` + `get chapters` + `get highlights` + `get keywords`
-- "Transcribe this local recording/video and extract the key points" -> `process <file>` + `get transcript` + `get summary`
+- "What do podcasts say about this topic?" -> `ask`
+- "Summarize the main insights from podcast transcripts on this topic" -> `ask`
+- "Find podcast episodes about this topic" -> `search episode`
+- "Find a few episodes on this topic, then I will choose what to read" -> `search episode`
+- "Find the podcast/show named Lex Fridman" -> `search podcast`
+- "Show me what's trending on Podwise right now" -> `popular`
+- "Show today's new episodes from podcasts I follow" -> `list episodes`
+- "Show which followed podcasts published recently" -> `list podcasts`
+- "Process this YouTube video and return the transcript and summary" -> confirm first, then `process` + `get transcript` + `get summary`
+- "Export this episode as subtitles" -> `get transcript --format srt` or `get transcript --format vtt`
+- "Give me an episode recap with summary, chapters, highlights, and keywords" -> `get summary` + `get chapters` + `get highlights` + `get keywords`
+- "Transcribe this local audio/video file and summarize the key points" -> confirm first, then `process <file>` + `get transcript` + `get summary`
 
 ## Common Failure Cases
 
 - If `podwise` is missing or not configured correctly, stop immediately and tell the user to fix the CLI setup first.
 - If a local file does not exist or the extension is unsupported, stop and ask for a valid path or supported media format.
-- If `list --latest` is used, keep it between `1` and `30`.
-- If the user provides both a specific day and a rolling window request, prefer `--date` because the CLI treats it as higher priority.
+- If the workflow requires `process` and the user has not agreed to spend quota/credits, pause and ask for confirmation before continuing.
 - If `ask` returns an error or plan-limit issue, report it directly; do not fabricate an answer.
 
 Load [references/installation.md](references/installation.md) when the user needs help installing the CLI or setting the API key.
@@ -179,5 +196,6 @@ For `ask` workflows, include:
 
 For `search`, `list`, and `popular` workflows, return the result list in a scannable order and preserve the CLI's intent: discovery, updates, or trending content.
 
-Load [references/commands.md](references/commands.md) when exact command examples are needed.
+For `search` workflows specifically, return matching podcasts or episodes rather than a transcript-synthesized answer.
+
 Load [references/installation.md](references/installation.md) when setup or installation help is needed.
