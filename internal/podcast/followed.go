@@ -46,9 +46,6 @@ func (r *FollowedPodcastsResult) FormatText(date string, days int) string {
 		fmt.Fprintf(&sb, "- **Owner:** %s\n", p.Owner)
 		fmt.Fprintf(&sb, "- **Last Published:** %s\n", lastPublish)
 		fmt.Fprintf(&sb, "- **Genre:** %s\n", p.Genre)
-		if p.IsStarred {
-			fmt.Fprintf(&sb, "- **Starred:** Yes\n")
-		}
 		fmt.Fprintf(&sb, "- **Podcast URL:** %s\n", BuildPodcastURL(p.Seq))
 		sb.WriteString("\n")
 	}
@@ -61,7 +58,6 @@ type FollowedPodcastJSON struct {
 	Owner           string `json:"owner"`
 	LastPublishDate string `json:"last_publish_date"`
 	Genre           string `json:"genre"`
-	IsStarred       bool   `json:"is_starred"`
 	PodcastURL      string `json:"podcast_url"`
 }
 
@@ -74,7 +70,6 @@ func (r *FollowedPodcastsResult) FormatJSON() ([]byte, error) {
 			Owner:           p.Owner,
 			LastPublishDate: time.Unix(p.LastPublishTime, 0).Format("2006-01-02"),
 			Genre:           p.Genre,
-			IsStarred:       p.IsStarred,
 			PodcastURL:      BuildPodcastURL(p.Seq),
 		})
 	}
