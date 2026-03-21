@@ -91,7 +91,7 @@ func FilePath() (string, error) {
 // Validate returns an error when required fields are missing.
 func Validate(cfg *Config) error {
 	if cfg.APIKey == "" {
-		return errors.New("API key is not set — run: podwise config set api_key <your-key>")
+		return errors.New("API key is not set — run: podwise auth or podwise config set api_key <your-key>")
 	}
 	return nil
 }

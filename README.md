@@ -50,14 +50,20 @@ sudo mv podwise /usr/local/bin/
 
 ## Configuration
 
-First, create your [podwise.ai](https://podwise.ai/dashboard/settings/developer) API key:
+Authorize the CLI in your browser and let it save the API key automatically:
 
 ```bash
-# Set your API key
-podwise config set api_key your-sk-xxxx
+# Open the browser authorization flow
+podwise auth
 
 # Verify connection
 podwise config show
+```
+
+If you already have an API key, you can still set it manually:
+
+```bash
+podwise config set api_key your-sk-xxxx
 ```
 
 The configuration is stored at `~/.config/podwise/config.toml`.

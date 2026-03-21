@@ -107,6 +107,7 @@ func init() {
 	rootCmd.AddCommand(drillCmd)
 	rootCmd.AddCommand(followCmd)
 	rootCmd.AddCommand(unfollowCmd)
+	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(mcpCmd)
 }
