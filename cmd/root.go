@@ -110,4 +110,5 @@ func init() {
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(mcpCmd)
+	rootCmd.AddCommand(exportCmd)
 }
