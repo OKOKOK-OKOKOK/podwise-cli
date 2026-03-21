@@ -150,25 +150,27 @@ podwise mcp
 
 The server exposes the following tools:
 
-| Tool                     | Description                                                                    |
-| ------------------------ | ------------------------------------------------------------------------------ |
-| `search_episode`         | Search for podcast episodes by title keywords                                  |
-| `search_podcast`         | Search for podcasts by name                                                    |
-| `popular`                | List current trending/popular podcast episodes                                 |
-| `process`                | Submit a YouTube / 小宇宙 / Podwise URL or local file for AI processing        |
-| `get_transcript`         | Fetch the full transcript (text / SRT / VTT)                                   |
-| `get_summary`            | Fetch the AI-generated summary and key takeaways                               |
-| `get_qa`                 | Fetch AI-extracted Q&A pairs                                                   |
-| `get_chapters`           | Fetch the chapter breakdown with timestamps                                    |
-| `get_mindmap`            | Fetch the AI-generated mind map                                                |
-| `get_highlights`         | Fetch notable highlights with timestamps                                       |
-| `get_keywords`           | Fetch topic keywords with descriptions                                         |
-| `ask`                    | Ask the AI a question answered from podcast transcripts                        |
-| `drill`                  | List recent episodes for a specific podcast by its Podwise URL                 |
-| `follow`                 | Follow a podcast by its Podwise URL (idempotent)                               |
-| `unfollow`               | Unfollow a podcast by its Podwise URL (idempotent)                             |
-| `list_episodes`          | List recent episodes from podcasts you follow, filterable by date or day range |
-| `list_podcasts`          | List followed podcasts with new episodes, filterable by date or day range      |
+| Tool               | Description                                                                    |
+| ------------------ | ------------------------------------------------------------------------------ |
+| `search_episode`   | Search for podcast episodes by title keywords                                  |
+| `search_podcast`   | Search for podcasts by name                                                    |
+| `popular`          | List current trending/popular podcast episodes                                 |
+| `process`          | Submit a YouTube / 小宇宙 / Podwise URL or local file for AI processing        |
+| `get_transcript`   | Fetch the full transcript (text / SRT / VTT)                                   |
+| `get_summary`      | Fetch the AI-generated summary and key takeaways                               |
+| `get_qa`           | Fetch AI-extracted Q&A pairs                                                   |
+| `get_chapters`     | Fetch the chapter breakdown with timestamps                                    |
+| `get_mindmap`      | Fetch the AI-generated mind map                                                |
+| `get_highlights`   | Fetch notable highlights with timestamps                                       |
+| `get_keywords`     | Fetch topic keywords with descriptions                                         |
+| `ask`              | Ask the AI a question answered from podcast transcripts                        |
+| `drill`            | List recent episodes for a specific podcast by its Podwise URL                 |
+| `follow`           | Follow a podcast by its Podwise URL (idempotent)                               |
+| `unfollow`         | Unfollow a podcast by its Podwise URL (idempotent)                             |
+| `list_episodes`    | List recent episodes from podcasts you follow, filterable by date or day range |
+| `list_podcasts`    | List followed podcasts with new episodes, filterable by date or day range      |
+| `history_read`     | List episodes you have read, sorted by most recent first                       |
+| `history_listened` | List episodes you have listened, sorted by most recent first                   |
 
 #### Install
 

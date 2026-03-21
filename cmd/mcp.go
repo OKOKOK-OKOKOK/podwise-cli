@@ -118,6 +118,16 @@ func runMCP(cmd *cobra.Command, args []string) error {
 		Description: "Ask the AI a question based on podcast transcripts. The AI searches relevant podcast transcripts and generates an answer with source citations. Use 'show_sources' to include cited excerpts and episode links in the response. The daily ask limit depends on your Podwise plan.",
 	}, mcpAsk)
 
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "history_read",
+		Description: "List episodes you have read in Podwise, sorted by most recent first. Use 'limit' to control the number of results (max 100, default 20).",
+	}, mcpHistoryRead)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "history_listened",
+		Description: "List episodes you have played in Podwise, sorted by most recent first. Use 'limit' to control the number of results (max 100, default 20).",
+	}, mcpHistoryListened)
+
 	err := server.Run(context.Background(), &mcp.StdioTransport{})
 	if errors.Is(err, io.EOF) || (err != nil && strings.Contains(err.Error(), "closing")) {
 		return nil
@@ -599,4 +609,50 @@ func mcpAsk(ctx context.Context, req *mcp.CallToolRequest, in mcpAskInput) (*mcp
 		return nil, struct{}{}, err
 	}
 	return textResult(result.FormatText(in.Question, in.ShowSources)), struct{}{}, nil
+}
+
+// ─── Tool: history_read ───────────────────────────────────────────────────────
+
+type mcpHistoryInput struct {
+	Limit int `json:"limit,omitempty" jsonschema:"maximum number of results to return (1-100, default 20)"`
+}
+
+func mcpHistoryRead(ctx context.Context, req *mcp.CallToolRequest, in mcpHistoryInput) (*mcp.CallToolResult, struct{}, error) {
+	limit := in.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	client, err := mcpLoadClient()
+	if err != nil {
+		return nil, struct{}{}, err
+	}
+	result, err := episode.FetchReadHistory(ctx, client, limit)
+	if err != nil {
+		return nil, struct{}{}, err
+	}
+	return textResult(result.FormatText()), struct{}{}, nil
+}
+
+// ─── Tool: history_listened ───────────────────────────────────────────────────
+
+func mcpHistoryListened(ctx context.Context, req *mcp.CallToolRequest, in mcpHistoryInput) (*mcp.CallToolResult, struct{}, error) {
+	limit := in.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	client, err := mcpLoadClient()
+	if err != nil {
+		return nil, struct{}{}, err
+	}
+	result, err := episode.FetchPlayedHistory(ctx, client, limit)
+	if err != nil {
+		return nil, struct{}{}, err
+	}
+	return textResult(result.FormatText()), struct{}{}, nil
 }
