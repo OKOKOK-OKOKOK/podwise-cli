@@ -130,10 +130,10 @@ podwise --help
 
 > **Prerequisites:** Before installing skills, make sure you have completed the [Installation](#installation) and [Configuration](#configuration) steps above — the `podwise` CLI must be installed and your `api_key` must be set.
 
-Podwise provides official agent skills out of the box. Run the following command to install the latest skills into your current directory:
+Podwise provides official agent skills out of the box. Run the following command to install the latest skills:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/hardhackerlabs/podwise-cli/main/install-skills.sh | sh
+npx skills add hardhackerlabs/podwise-cli
 ```
 
 You can also build your own skills on top of the `podwise` CLI to create custom workflows that fit your needs.

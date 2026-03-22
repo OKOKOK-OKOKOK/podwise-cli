@@ -30,4 +30,5 @@ SKILL_*.md
 .cursor/
 .gocache/
 
+skills-lock.json
 taste.md
