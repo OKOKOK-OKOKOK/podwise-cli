@@ -29,6 +29,7 @@ type PodcastEpisode struct {
 	Duration    int     `json:"duration"`
 	Transcribed bool    `json:"transcribed"`
 	Language    *string `json:"language"`
+	IsRead      bool    `json:"isRead"`
 }
 
 // PodcastEpisodesResult holds the list of episodes for a specific podcast.
@@ -62,6 +63,11 @@ func (r *PodcastEpisodesResult) FormatText(date string, days int) string {
 		}
 		fmt.Fprintf(&sb, "- **Processed:** %s\n", processedLabel)
 		fmt.Fprintf(&sb, "- **Episode URL:** %s\n", episode.BuildEpisodeURL(ep.Seq))
+		readLabel := "No"
+		if ep.IsRead {
+			readLabel = "Yes"
+		}
+		fmt.Fprintf(&sb, "- **Read:** %s\n", readLabel)
 		sb.WriteString("\n")
 	}
 	return sb.String()
@@ -75,6 +81,7 @@ type PodcastEpisodeJSON struct {
 	Duration    *string `json:"duration,omitempty"`
 	Language    *string `json:"language,omitempty"`
 	Processed   bool    `json:"processed"`
+	IsRead      bool    `json:"is_read"`
 }
 
 // FormatJSON serialises the podcast episodes as indented JSON.
@@ -89,6 +96,7 @@ func (r *PodcastEpisodesResult) FormatJSON() ([]byte, error) {
 			Duration:    &duration,
 			Language:    ep.Language,
 			Processed:   ep.Transcribed,
+			IsRead:      ep.IsRead,
 		})
 	}
 	return json.MarshalIndent(items, "", "  ")

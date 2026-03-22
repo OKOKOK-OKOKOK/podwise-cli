@@ -28,6 +28,7 @@ type FollowedEpisode struct {
 	Duration    int     `json:"duration"`
 	Transcribed bool    `json:"transcribed"`
 	Language    *string `json:"language"`
+	IsRead      bool    `json:"isRead"`
 }
 
 // FollowedResult holds the list of followed episodes returned by the API.
@@ -59,6 +60,11 @@ func (r *FollowedResult) FormatText(date string, days int) string {
 		}
 		fmt.Fprintf(&sb, "- **Processed:** %s\n", processedLabel)
 		fmt.Fprintf(&sb, "- **Episode URL:** %s\n", BuildEpisodeURL(ep.Seq))
+		readLabel := "No"
+		if ep.IsRead {
+			readLabel = "Yes"
+		}
+		fmt.Fprintf(&sb, "- **Read:** %s\n", readLabel)
 		sb.WriteString("\n")
 	}
 	return sb.String()
@@ -73,6 +79,7 @@ type FollowedEpisodeJSON struct {
 	Duration    *string `json:"duration,omitempty"`
 	Language    *string `json:"language,omitempty"`
 	Processed   bool    `json:"processed"`
+	IsRead      bool    `json:"is_read"`
 }
 
 // FormatJSON serialises the followed episodes as indented JSON.
@@ -89,6 +96,7 @@ func (r *FollowedResult) FormatJSON() ([]byte, error) {
 			Duration:    &duration,
 			Language:    ep.Language,
 			Processed:   ep.Transcribed,
+			IsRead:      ep.IsRead,
 		})
 	}
 	return json.MarshalIndent(items, "", "  ")
