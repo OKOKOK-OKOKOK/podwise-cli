@@ -29,3 +29,5 @@ vendor/
 SKILL_*.md
 .cursor/
 .gocache/
+
+taste.md
