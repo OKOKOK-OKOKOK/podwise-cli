@@ -6,7 +6,7 @@ Use this skill to process a backlog of new podcast episodes in one pass. It comb
 
 1. Verify that `podwise` is installed and configured.
 2. Load `taste.md` if it exists, to personalize triage priority.
-3. Fetch new episodes from followed podcasts for the requested time window.
+3. Fetch unlistened episodes from followed podcasts for the past 7 days.
 4. Triage each episode: assign a priority tier based on the user's interests.
 5. For Tier 1 episodes, fetch AI summaries and highlights automatically.
 6. For Tier 2 and Tier 3 episodes, show just enough to let the user decide.
@@ -31,26 +31,17 @@ Look for `taste.md` in the current working directory.
 ## Step 3: Fetch New Episodes
 
 ```bash
-# Recent episodes from followed podcasts (candidate pool)
-podwise list episodes --json --latest 14
-
-# Episodes the user has already listened to (for exclusion)
-podwise history listened --json --limit 100
-
-# User's subscription list (proxy: podcasts with updates in last 90 days)
-podwise list podcasts --json --latest 30
+# Recent episodes from followed podcasts
+podwise list episodes --json --latest 7
 ```
 
-Parse each entry for: podcast name, episode title, publication date, episode URL, and any available duration or category metadata.
+Parse each entry for: podcast name, episode title, publication date, episode URL, isRead status, and any available duration or category metadata.
 
 **Filtering logic:**
 
-1. From `list episodes`, exclude any episode that appears in **either** `history listened` **or** `history read`.
-2. From the remaining episodes, exclude any episode whose show does not appear in `list podcasts --latest 90` — these are shows the user does not follow.
-3. The remaining episodes are the user's backlog — sort by publication date (newest first) and take the **top 10**.
-4. Silently record any episodes beyond the top 10 as "older backlog" — do not display them in the digest.
-
-> Note: `history listened` has no listening timestamp, so "most recent" is proxied by episode publication date.
+1. From `list episodes`, filter to only episodes where `isRead == false`.
+2. Sort by publication date (newest first).
+3. Display all remaining episodes in the digest (no top-N limit).
 
 If the user specified a different window, adjust `--latest N` accordingly.
 
