@@ -70,13 +70,23 @@ The configuration is stored at `~/.config/podwise/config.toml`.
 
 ## Usage
 
-You can search for podcast episodes or process specific episodes to get summaries and transcripts.
+#### Trending Episodes
+
+```bash
+podwise popular
+```
+
+#### Ask AI
+
+```bash
+# Ask a question answered from podcast transcripts
+podwise ask "the future of AI Agents"
+```
 
 #### Search Episodes
 
 ```bash
 # Search episodes by title keywords
-podwise search "Hard Fork"
 podwise search episode "machine learning" --limit 20
 
 # Search podcasts by name
@@ -94,21 +104,6 @@ podwise process https://www.xiaoyuzhoufm.com/episode/abc123
 
 # Youtube video URL
 podwise process https://www.youtube.com/watch?v=d0-Gn_Bxf8s
-podwise process https://youtu.be/d0-Gn_Bxf8s`,
-```
-
-#### Trending Episodes
-
-```bash
-podwise popular
-```
-
-#### Ask AI
-
-```bash
-# Ask a question answered from podcast transcripts
-podwise ask "the future of AI Agents"
-podwise ask "How does retrieval augmented generation work?" --sources
 ```
 
 #### Get Episode Details
@@ -122,6 +117,7 @@ podwise get transcript <episode-url>
 ```
 
 For more details on all available commands and flags, run:
+
 ```bash
 podwise --help
 ```
