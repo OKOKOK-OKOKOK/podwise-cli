@@ -39,7 +39,7 @@ git clone https://github.com/hardhackerlabs/podwise-cli.git
 cd podwise-cli
 go build -o podwise .
 # Move the binary to a directory in your PATH, e.g.,
-sudo mv podwise /usr/local/bin/
+mv podwise /usr/local/bin/
 ```
 
 ## Configuration

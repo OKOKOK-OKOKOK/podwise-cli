@@ -45,7 +45,7 @@ git clone https://github.com/hardhackerlabs/podwise-cli.git
 cd podwise-cli
 go build -o podwise .
 # Move the binary to a directory in your PATH, e.g.,
-sudo mv podwise /usr/local/bin/
+mv podwise /usr/local/bin/
 ```
 
 ## Configuration
@@ -134,16 +134,16 @@ podwise --help
 
 The Podwise skill routes your intent to the right workflow automatically:
 
-| Workflow | What it does |
-|---|---|
-| **catch-up** | Catch up on missed episodes from podcasts you follow |
-| **weekly-recap** | Generate a weekly listening recap with highlights |
-| **episode-notes** | Export episode summaries and highlights to Notion, Obsidian, or Logseq |
-| **topic-research** | Research a topic across multiple podcast episodes |
-| **episode-debate** | Challenge and stress-test ideas from an episode |
-| **language-learning** | Generate Anki flashcards from a transcript |
-| **discover** | Get personalised podcast recommendations based on your taste |
-| **refine-taste** | Build your listener profile for personalised outputs |
+| Workflow              | What it does                                                           |
+| --------------------- | ---------------------------------------------------------------------- |
+| **catch-up**          | Catch up on missed episodes from podcasts you follow                   |
+| **weekly-recap**      | Generate a weekly listening recap with highlights                      |
+| **episode-notes**     | Export episode summaries and highlights to Notion, Obsidian, or Logseq |
+| **topic-research**    | Research a topic across multiple podcast episodes                      |
+| **episode-debate**    | Challenge and stress-test ideas from an episode                        |
+| **language-learning** | Generate Anki flashcards from a transcript                             |
+| **discover**          | Get personalised podcast recommendations based on your taste           |
+| **refine-taste**      | Build your listener profile for personalised outputs                   |
 
 ### How It Works
 
