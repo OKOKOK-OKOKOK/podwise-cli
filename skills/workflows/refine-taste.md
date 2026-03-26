@@ -13,11 +13,11 @@ Use this skill to construct a `taste.md` file that captures the user's podcast t
 ## Step 1: Check the Environment
 
 ```bash
-podwise --help
-podwise config show
+podwise_proxy --help
+podwise_proxy config show
 ```
 
-If `podwise` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
+If `podwise_proxy` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
 
 ## Step 2: Gather Data from the CLI
 
@@ -25,13 +25,13 @@ Run these commands to collect raw material for the taste profile:
 
 ```bash
 # All podcasts the user follows (podcasts with recent updates as proxy for subscription list)
-podwise list podcasts --json --latest 30
+podwise_proxy list podcasts --json --latest 30
 
 # Real listening behaviour (primary signal for engagement)
-podwise history listened --json --limit 100
+podwise_proxy history listened --json --limit 100
 
 # Read activity (exploration behaviour beyond regular listens)
-podwise history read --json --limit 100
+podwise_proxy history read --json --limit 100
 ```
 
 Parse the output to extract:
@@ -110,7 +110,7 @@ After writing the file:
 
 ## Common Failure Cases
 
-- If `podwise list podcasts` returns an empty list, the user has no subscriptions yet. Ask them to follow at least a few podcasts in Podwise before running this skill.
+- If `podwise_proxy list podcasts` returns an empty list, the user has no subscriptions yet. Ask them to follow at least a few podcasts in Podwise before running this skill.
 - If the user skips the clarifying questions, write the taste profile from CLI data alone and mark skipped fields as `unknown`.
 - If `taste.md` already exists, ask whether to overwrite or append before writing.
 

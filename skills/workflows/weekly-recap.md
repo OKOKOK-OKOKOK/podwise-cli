@@ -13,11 +13,11 @@ Use this skill to turn a week of scattered podcast listening into one coherent d
 ## Step 1: Check the Environment
 
 ```bash
-podwise --help
-podwise config show
+podwise_proxy --help
+podwise_proxy config show
 ```
 
-If `podwise` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
+If `podwise_proxy` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
 
 ## Step 2: Load the Listener Taste
 
@@ -38,10 +38,10 @@ Fetch from two sources simultaneously:
 
 ```bash
 # Actual listening behaviour this week
-podwise history listened --json --limit 100
+podwise_proxy history listened --json --limit 100
 
 # Episodes the user read (viewed summaries/highlights but may not have listened fully)
-podwise history read --json --limit 100
+podwise_proxy history read --json --limit 100
 ```
 
 Parse each entry for: podcast name, episode title, publication date, and episode URL.
@@ -51,18 +51,18 @@ Then apply a secondary filter: keep only episodes whose publication date falls w
 **Fallback**: If the combined result after filtering is fewer than 5 episodes, supplement with:
 
 ```bash
-podwise list episodes --json --date {window_start} --date {window_end}
+podwise_proxy list episodes --json --date {window_start} --date {window_end}
 ```
 
-Mark any supplement episodes as "not yet listened — published this week". If the total remains below 5 even after supplement, degrade to `podwise list episodes --latest 7` and note at the top of the recap: *"Based on your subscriptions this week — your listening history was thin for this window."*
+Mark any supplement episodes as "not yet listened — published this week". If the total remains below 5 even after supplement, degrade to `podwise_proxy list episodes --latest 7` and note at the top of the recap: *"Based on your subscriptions this week — your listening history was thin for this window."*
 
 ## Step 5: Fetch AI Outputs for Each Episode
 
 For each episode that made it through the Step 4 filter, fetch:
 
 ```bash
-podwise get summary {episode-url}
-podwise get highlights {episode-url}
+podwise_proxy get summary {episode-url}
+podwise_proxy get highlights {episode-url}
 ```
 
 Fetch `get keywords` optionally — only when the recap covers 5 or more episodes and the themes section may benefit from keyword context. Do not make it a required call.
@@ -71,7 +71,7 @@ If `get` fails for an episode because it has not been processed yet, include it 
 
 **Silently record** every episode in the Step 4 history results that did not make it into the Part 1 recap (i.e., episodes beyond the top entries or from older weeks). These go into a "Also in your history this week" section at the bottom of the recap — title, podcast name, and date only, no `get` calls.
 
-Do not run `podwise process` automatically during a recap.
+Do not run `podwise_proxy process` automatically during a recap.
 
 ## Step 6: Synthesize the Recap
 

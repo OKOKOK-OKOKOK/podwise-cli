@@ -14,11 +14,11 @@ Use this skill to answer the question: *what do podcasts actually say about X?* 
 ## Step 1: Check the Environment
 
 ```bash
-podwise --help
-podwise config show
+podwise_proxy --help
+podwise_proxy config show
 ```
 
-If `podwise` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
+If `podwise_proxy` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
 
 ## Step 2: Load the Listener Taste
 
@@ -40,7 +40,7 @@ If the user already provided both, skip the questions and proceed.
 
 ```bash
 # Transcript-grounded synthesis — --sources appends cited episode URLs and excerpts
-podwise ask "{topic}" --sources
+podwise_proxy ask "{topic}" --sources
 ```
 
 `ask` searches transcript content and generates a synthesized answer — it may take up to 60 seconds. Do not cancel it early.
@@ -52,9 +52,9 @@ Parse the `ask` output to extract all cited episode URLs. These are the primary 
 From the `ask --sources` output, identify all cited episode URLs. For each cited episode, run:
 
 ```bash
-podwise get summary {episode-url}
-podwise get highlights {episode-url}
-podwise get keywords {episode-url}
+podwise_proxy get summary {episode-url}
+podwise_proxy get highlights {episode-url}
+podwise_proxy get keywords {episode-url}
 ```
 
 **Handling cited episode count:**
@@ -68,7 +68,7 @@ If any `get` fails because an episode is not yet processed, skip that episode an
 If the user explicitly asks to include an unprocessed episode, ask for confirmation once and then run:
 
 ```bash
-podwise process {episode-url}
+podwise_proxy process {episode-url}
 ```
 
 ## Step 6: Synthesize the Research Report
@@ -161,7 +161,7 @@ After writing the file, confirm the path and ask:
 
 ## Common Failure Cases
 
-- If `podwise ask` times out or returns an error, report the error directly. Do not fabricate a synthesis — tell the user the research could not be completed and suggest retrying with a more specific topic.
+- If `podwise_proxy ask` times out or returns an error, report the error directly. Do not fabricate a synthesis — tell the user the research could not be completed and suggest retrying with a more specific topic.
 - If the user's topic is very broad (e.g. "technology", "health"), ask them to narrow it before running — `ask` performs better on specific questions than general categories.
 - If `get` fails for a cited episode because it is not yet processed, skip it and note it in the report. The `ask` synthesis remains the primary source.
 - If all cited episodes fail to fetch artifacts, produce a lightweight report from the `ask` text output only and label it clearly as a "synthesis-only report".

@@ -15,8 +15,8 @@ Use this skill to process a backlog of new podcast episodes in one pass. It comb
 ## Step 1: Check the Environment
 
 ```bash
-podwise --help
-podwise config show
+podwise_proxy --help
+podwise_proxy config show
 ```
 
 If `podwise` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
@@ -32,7 +32,7 @@ Look for `taste.md` in the current working directory.
 
 ```bash
 # Recent episodes from followed podcasts
-podwise list episodes --json --latest 7
+podwise_proxy list episodes --json --latest 7
 ```
 
 Parse each entry for: podcast name, episode title, publication date, episode URL, isRead status, and any available duration or category metadata.
@@ -65,8 +65,8 @@ If no `taste.md` is loaded, assign all episodes to Tier 2 and note that personal
 For each Tier 1 episode, run:
 
 ```bash
-podwise get summary {episode-url}
-podwise get highlights {episode-url}
+podwise_proxy get summary {episode-url}
+podwise_proxy get highlights {episode-url}
 ```
 
 If `get` fails because the episode is not yet processed, include it in the digest with its title, podcast name, and a note: "not yet processed — [Open episode]({url})". Ask the user whether they want to process it before fetching the summary.
@@ -118,23 +118,23 @@ After the digest, ask: *"Would you like to go deeper on any of these, or save an
 **Go deeper on a specific episode:**
 
 ```bash
-podwise get summary {episode-url}
-podwise get highlights {episode-url}
+podwise_proxy get summary {episode-url}
+podwise_proxy get highlights {episode-url}
 ```
 
 **For full artifacts:**
 
 ```bash
-podwise get qa {episode-url}
-podwise get chapters {episode-url}
-podwise get mindmap {episode-url}
-podwise get keywords {episode-url}
+podwise_proxy get qa {episode-url}
+podwise_proxy get chapters {episode-url}
+podwise_proxy get mindmap {episode-url}
+podwise_proxy get keywords {episode-url}
 ```
 
 **Transcript** (token-intensive — request only when you need a specific quote or full record):
 
 ```bash
-podwise get transcript {episode-url}
+podwise_proxy get transcript {episode-url}
 ```
 
 **Save to PKM:** Guide the user to use `episode-notes` for the specific episode URL.
@@ -143,7 +143,7 @@ Always confirm before running `process`.
 
 ## Common Failure Cases
 
-- If `podwise list episodes --latest 7` returns empty, tell the user their followed podcasts have no new episodes this week and suggest expanding the window to `--latest 14` if they want to check further back.
+- If `podwise_proxy list episodes --latest 7` returns empty, tell the user their followed podcasts have no new episodes this week and suggest expanding the window to `--latest 14` if they want to check further back.
 - If the combined result after filtering is fewer than 5 episodes, inform the user that their backlog is already clear — their followed podcasts have no unlistened episodes in this window.
 - If `get summary` or `get highlights` fails because an episode is not processed, include it in the digest with its title, podcast name, and "not yet processed" — give the user the episode URL and ask if they want to process it before fetching the summary.
 - If the user has no followed podcasts, stop and ask them to follow some shows in Podwise before running catch-up.

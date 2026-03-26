@@ -14,11 +14,11 @@ Use this skill to turn a single processed episode into a well-structured, portab
 ## Step 1: Check the Environment
 
 ```bash
-podwise --help
-podwise config show
+podwise_proxy --help
+podwise_proxy config show
 ```
 
-If `podwise` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
+If `podwise_proxy` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
 
 ## Step 2: Load the Listener Taste
 
@@ -38,7 +38,7 @@ The user may provide the episode in several ways:
 - An episode title or keyword — in this case, search first:
 
 ```bash
-podwise search episode "{title or keyword}" --limit 5 --json
+podwise_proxy search episode "{title or keyword}" --limit 5 --json
 ```
 
 Present the results and ask the user to confirm which episode they want before continuing.
@@ -50,7 +50,7 @@ If the user provides a YouTube, Xiaoyuzhou, or local file input, that content mu
 For a Podwise episode URL, attempt to fetch the summary to check if processing is complete:
 
 ```bash
-podwise get summary {episode-url}
+podwise_proxy get summary {episode-url}
 ```
 
 - If this succeeds, the episode is already processed. Skip to Step 5.
@@ -61,29 +61,29 @@ podwise get summary {episode-url}
 Only run `process` after explicit confirmation:
 
 ```bash
-podwise process {episode-url}
+podwise_proxy process {episode-url}
 ```
 
 For YouTube, Xiaoyuzhou URLs, or local files, always ask for confirmation before processing — these always consume quota:
 
 ```bash
-podwise process {youtube-or-xiaoyuzhou-url}
-podwise process {local-file-path} --title "{title}"
+podwise_proxy process {youtube-or-xiaoyuzhou-url}
+podwise_proxy process {local-file-path} --title "{title}"
 ```
 
-`podwise process` waits for completion before exiting. Once it returns successfully, the Podwise episode URL will be available in its output — use that URL for all subsequent `get` commands.
+`podwise_proxy process` waits for completion before exiting. Once it returns successfully, the Podwise episode URL will be available in its output — use that URL for all subsequent `get` commands.
 
 ## Step 5: Fetch All AI Artifacts
 
 Run all `get` commands for the episode:
 
 ```bash
-podwise get summary {episode-url}
-podwise get chapters {episode-url}
-podwise get highlights {episode-url}
-podwise get qa {episode-url}
-podwise get keywords {episode-url}
-podwise get mindmap {episode-url}
+podwise_proxy get summary {episode-url}
+podwise_proxy get chapters {episode-url}
+podwise_proxy get highlights {episode-url}
+podwise_proxy get qa {episode-url}
+podwise_proxy get keywords {episode-url}
+podwise_proxy get mindmap {episode-url}
 ```
 
 Run these in sequence. If any individual command fails, mark that artifact as unavailable in the note rather than stopping the whole skill.
@@ -91,7 +91,7 @@ Run these in sequence. If any individual command fails, mark that artifact as un
 Optionally fetch the transcript if the user specifically requested it or if their taste profile indicates they prefer full transcripts:
 
 ```bash
-podwise get transcript {episode-url}
+podwise_proxy get transcript {episode-url}
 ```
 
 Do not include the full transcript in the note by default — it is too long for most PKM use cases. Offer it as a separate file if the user wants it.

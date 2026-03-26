@@ -1,0 +1,4 @@
+.\podwise_proxy.ps1 popular
+.\podwise_proxy.ps1 ask "the future of AI Agents"
+.\podwise_proxy.ps1 search episode "machine learning" --limit 20
+.\podwise_proxy.ps1 process https://www.xiaoyuzhoufm.com/episode/abc123

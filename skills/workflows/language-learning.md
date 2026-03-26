@@ -14,11 +14,11 @@ Use this skill to mine a podcast transcript for language learning material. It p
 ## Step 1: Check the Environment
 
 ```bash
-podwise --help
-podwise config show
+podwise_proxy --help
+podwise_proxy config show
 ```
 
-If `podwise` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
+If `podwise_proxy` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
 
 ## Step 2: Load the Listener Taste
 
@@ -38,12 +38,12 @@ The user may provide the episode as:
 - An episode title or keyword — search first:
 
 ```bash
-podwise search episode "{title or keyword}" --limit 5 --json
+podwise_proxy search episode "{title or keyword}" --limit 5 --json
 ```
 
 Present the results and ask the user to confirm which episode before continuing.
 
-If the user provided a YouTube URL, Xiaoyuzhou URL, or local file path, run `podwise process <url>` before Step 5 to obtain a valid Podwise episode URL. Ask for confirmation before processing:
+If the user provided a YouTube URL, Xiaoyuzhou URL, or local file path, run `podwise_proxy process <url>` before Step 5 to obtain a valid Podwise episode URL. Ask for confirmation before processing:
 
 > "This episode hasn't been processed yet. Processing will use one credit from your Podwise quota. Proceed?"
 
@@ -68,7 +68,7 @@ Use the answers to calibrate extraction in Step 6.
 ## Step 5: Fetch the Transcript
 
 ```bash
-podwise get transcript {episode-url}
+podwise_proxy get transcript {episode-url}
 ```
 
 If the episode is not yet processed, ask the user for confirmation before processing:
@@ -78,7 +78,7 @@ If the episode is not yet processed, ask the user for confirmation before proces
 Only run `process` after explicit confirmation:
 
 ```bash
-podwise process {episode-url}
+podwise_proxy process {episode-url}
 ```
 
 Once processed, fetch the transcript again.

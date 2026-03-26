@@ -14,11 +14,11 @@ Use this skill to expand the user's podcast world beyond their existing subscrip
 ## Step 1: Check the Environment
 
 ```bash
-podwise --help
-podwise config show
+podwise_proxy --help
+podwise_proxy config show
 ```
 
-If `podwise` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
+If `podwise_proxy` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.  
 
 ## Step 2: Load the Listener Taste
 
@@ -52,7 +52,7 @@ Use `popular` and `ask` as the primary discovery engines.
 ### Surface What's Trending
 
 ```bash
-podwise popular --json
+podwise_proxy popular --json
 ```
 
 Cross-reference popular episodes with the user's interest areas (from taste profile) or the topics they mentioned in Step 3. Keep any popular episode whose topic overlaps with their interests. These are the primary episode candidates.
@@ -62,7 +62,7 @@ Cross-reference popular episodes with the user's interest areas (from taste prof
 Use `ask` to find podcast content on topics *adjacent* to what the user already knows — to expand rather than reinforce:
 
 ```bash
-podwise ask "podcasts about {adjacent topic}" --sources
+podwise_proxy ask "podcasts about {adjacent topic}" --sources
 ```
 
 Choose 1–2 adjacent topics by reasoning from the taste profile:
@@ -77,8 +77,8 @@ If no taste profile is loaded, base the adjacent topic query on the user's Step 
 If the user explicitly asked for shows or episodes about a specific topic, use search as a targeted lookup — not as a default discovery path:
 
 ```bash
-podwise search podcast "{topic}" --limit 5 --json
-podwise search episode "{topic}" --limit 5 --json
+podwise_proxy search podcast "{topic}" --limit 5 --json
+podwise_proxy search episode "{topic}" --limit 5 --json
 ```
 
 ## Step 5: Filter and Score Candidates
@@ -86,7 +86,7 @@ podwise search episode "{topic}" --limit 5 --json
 Silently filter the candidate pool using the whitelist:
 
 ```bash
-podwise list podcasts --json --latest 30
+podwise_proxy list podcasts --json --latest 30
 ```
 
 Filter rules in order:
@@ -108,14 +108,14 @@ Fetch summaries for up to **4 show candidates** and **5 episode candidates** —
 
 For episode candidates:
 ```bash
-podwise get summary {episode-url}
+podwise_proxy get summary {episode-url}
 ```
 
 For show candidates: use `drill` to get a recent episode URL for that show, then fetch its summary:
 
 ```bash
-podwise drill https://podwise.ai/dashboard/podcasts/{id} --latest 7 --json
-podwise get summary {episode-url}
+podwise_proxy drill https://podwise.ai/dashboard/podcasts/{id} --latest 7 --json
+podwise_proxy get summary {episode-url}
 ```
 
 If a candidate episode is not processed and cannot be fetched, use the candidate source metadata only. Do not process episodes during a discovery session — the user has not indicated intent to consume these yet.
@@ -146,7 +146,7 @@ For each recommended podcast (up to 4):
 
 Why for you: {one sentence connecting this show to a specific thing in the user's taste profile or stated interests.}
 
-Follow now: `podwise follow https://podwise.ai/dashboard/podcasts/{id}`
+Follow now: `podwise_proxy follow https://podwise.ai/dashboard/podcasts/{id}`
 
 ---
 
@@ -170,7 +170,7 @@ After the list, ask:
 
 - If `popular` and `ask` return only candidates that are already in the user's subscription whitelist, tell the user: *"Your current subscriptions already cover this space well — here is what I found at the edges."* Present what there is rather than inflating the list.
 - If the user has very narrow interests and the candidate pool after filtering is fewer than 3 items, tell them honestly and present what there is.
-- If the user has no taste profile and refuses to provide interests, run `podwise popular --json` and present the top 5 trending episodes with no personalisation — label them clearly as generic trending content, not personalised picks.
+- If the user has no taste profile and refuses to provide interests, run `podwise_proxy popular --json` and present the top 5 trending episodes with no personalisation — label them clearly as generic trending content, not personalised picks.
 - If `taste.md`'s `_Last updated: {date}` is more than 60 days ago, note this at the top of the recommendations and suggest re-running `refine-taste` for fresher results.
 
 ## Output Contract

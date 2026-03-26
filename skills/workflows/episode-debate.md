@@ -14,11 +14,11 @@ Use this skill to turn passive listening into active thinking. It extracts the s
 ## Step 1: Check the Environment
 
 ```bash
-podwise --help
-podwise config show
+podwise_proxy --help
+podwise_proxy config show
 ```
 
-If `podwise` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
+If `podwise_proxy` is not installed or the API key is missing, stop and follow [references/installation.md](references/installation.md) before continuing.
 
 ## Step 2: Load the Listener Taste
 
@@ -36,7 +36,7 @@ The user may provide the episode as:
 - An episode title or keyword — search first:
 
 ```bash
-podwise search episode "{title or keyword}" --limit 5 --json
+podwise_proxy search episode "{title or keyword}" --limit 5 --json
 ```
 
 Present the results and ask the user to confirm which episode before continuing.
@@ -46,10 +46,10 @@ Present the results and ask the user to confirm which episode before continuing.
 Fetch the episode's AI artifacts to build a full picture of its arguments:
 
 ```bash
-podwise get summary {episode-url}
-podwise get highlights {episode-url}
-podwise get qa {episode-url}
-podwise get chapters {episode-url}
+podwise_proxy get summary {episode-url}
+podwise_proxy get highlights {episode-url}
+podwise_proxy get qa {episode-url}
+podwise_proxy get chapters {episode-url}
 ```
 
 If any command fails because the episode is not yet processed, ask the user for confirmation before processing:
@@ -59,7 +59,7 @@ If any command fails because the episode is not yet processed, ask the user for 
 Only run `process` after explicit confirmation:
 
 ```bash
-podwise process {episode-url}
+podwise_proxy process {episode-url}
 ```
 
 Once processed, re-run the `get` commands.
@@ -69,7 +69,7 @@ Do not begin the debate until at least `get summary` and `get highlights` succee
 Optionally, if the episode's speaker attribution in highlights is ambiguous, fetch the transcript to confirm who made which claim:
 
 ```bash
-podwise get transcript {episode-url}
+podwise_proxy get transcript {episode-url}
 ```
 
 Use the transcript only to disambiguate speaker attribution — do not read it in full for claim extraction. Skip this step if attribution is already clear from the other artifacts.
