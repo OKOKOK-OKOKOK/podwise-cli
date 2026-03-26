@@ -1,3 +1,28 @@
+# 本地化修改
+
+如果走全局代理,则不需要这个自用修改过的仓库,直接用官方仓库即可,
+
+没法直连podwise.ai，所以需要本地化修改,
+
+添加了脚本,让请求走指定的端口,我自己用的7897端口,看个人设置灵活修改即可
+```
+# podwise_proxy.ps1
+# 设置代理环境变量（只对当前脚本生效）
+$env:HTTP_PROXY="http://127.0.0.1:7897"
+$env:HTTPS_PROXY="http://127.0.0.1:7897"
+
+# 执行 Podwise 命令，传递所有参数
+podwise.exe $args
+```
+
+将skills所有原本的podwise命令,都替换为podwise_proxy命令,即可.
+
+按照官方仓库的步骤,
+进行go编译,
+将添加到环境变量的PATH中,
+
+然后正常使用即可,
+
 # podwise-cli
 
 ![podwise](assets/podwise.png)
